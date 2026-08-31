@@ -1,246 +1,104 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="te">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Live Bluetooth Mic & Voice Modulator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>లైవ్ బ్లూటూత్ మైక్ - Live Mic</title>
   <style>
-    :root {
-      --bg-gradient: linear-gradient(135deg, #090d16 0%, #111827 100%);
-      --card-bg: rgba(23, 32, 51, 0.75);
-      --border-color: rgba(255, 255, 255, 0.08);
-      --primary: #38bdf8;
-      --primary-glow: rgba(56, 189, 248, 0.35);
-      --danger: #ef4444;
-      --success: #22c55e;
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-    }
-
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-      -webkit-tap-highlight-color: transparent;
+      font-family: system-ui, -apple-system, sans-serif;
     }
-
     body {
-      background: var(--bg-gradient);
-      color: var(--text-main);
+      background-color: #0f172a;
+      color: #f8fafc;
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
       padding: 20px;
     }
-
-    .app-card {
-      background: var(--card-bg);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid var(--border-color);
-      border-radius: 28px;
-      padding: 32px 24px;
+    .card {
+      background: #1e293b;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
       width: 100%;
-      max-width: 420px;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+      max-width: 400px;
       text-align: center;
     }
-
-    .header-tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: rgba(56, 189, 248, 0.1);
-      border: 1px solid rgba(56, 189, 248, 0.2);
-      color: var(--primary);
-      font-size: 0.75rem;
-      font-weight: 600;
-      padding: 5px 12px;
-      border-radius: 9999px;
-      margin-bottom: 16px;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-    }
-
     h1 {
-      font-size: 1.6rem;
-      font-weight: 700;
-      margin-bottom: 6px;
-      background: linear-gradient(to right, #ffffff, #94a3b8);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      font-size: 1.5rem;
+      margin-bottom: 10px;
+      color: #38bdf8;
     }
-
-    .subtitle {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      margin-bottom: 28px;
+    p {
+      font-size: 0.9rem;
+      color: #94a3b8;
+      margin-bottom: 25px;
     }
-
-    .mic-container {
-      position: relative;
-      margin: 0 auto 28px auto;
-      width: 130px;
-      height: 130px;
-    }
-
-    .mic-button {
-      width: 100%;
-      height: 100%;
+    .mic-btn {
+      width: 120px;
+      height: 120px;
       border-radius: 50%;
       border: none;
-      outline: none;
-      background: linear-gradient(135deg, #ef4444, #b91c1c);
+      background: #ef4444;
       color: white;
       font-size: 1.1rem;
-      font-weight: 700;
-      letter-spacing: 0.5px;
+      font-weight: bold;
       cursor: pointer;
-      box-shadow: 0 0 25px rgba(239, 68, 68, 0.4);
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+      transition: all 0.3s ease;
       display: flex;
-      flex-direction: column;
       justify-content: center;
       align-items: center;
-      gap: 4px;
+      margin: 0 auto 25px auto;
     }
-
-    .mic-button.active {
-      background: linear-gradient(135deg, #22c55e, #15803d);
-      box-shadow: 0 0 35px rgba(34, 197, 94, 0.6);
-      transform: scale(1.03);
+    .mic-btn.active {
+      background: #22c55e;
+      box-shadow: 0 0 25px rgba(34, 197, 94, 0.7);
+      transform: scale(1.05);
     }
-
-    .mic-icon {
-      width: 28px;
-      height: 28px;
-      fill: currentColor;
-    }
-
-    .control-panel {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      margin-bottom: 24px;
-    }
-
-    .control-box {
-      background: rgba(15, 23, 42, 0.6);
-      border: 1px solid var(--border-color);
-      border-radius: 16px;
-      padding: 14px 16px;
+    .slider-container {
+      margin: 20px 0;
       text-align: left;
     }
-
-    .control-label {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      margin-bottom: 10px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .control-value {
-      color: var(--primary);
-      font-weight: 700;
-    }
-
-    select, input[type="range"] {
-      width: 100%;
-      accent-color: var(--primary);
-    }
-
-    select {
-      background: #1e293b;
-      color: var(--text-main);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 10px 12px;
-      border-radius: 10px;
-      font-size: 0.9rem;
-      outline: none;
-      cursor: pointer;
-    }
-
-    .status-bar {
-      padding: 12px 16px;
-      border-radius: 12px;
-      background: rgba(15, 23, 42, 0.8);
-      border: 1px solid var(--border-color);
+    label {
+      display: block;
       font-size: 0.85rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      color: var(--text-muted);
+      margin-bottom: 8px;
+      color: #cbd5e1;
     }
-
-    .indicator {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #64748b;
+    input[type="range"] {
+      width: 100%;
+      accent-color: #38bdf8;
     }
-
-    .indicator.active {
-      background: var(--success);
-      box-shadow: 0 0 10px var(--success);
+    .status {
+      margin-top: 15px;
+      padding: 10px;
+      border-radius: 8px;
+      background: #334155;
+      font-size: 0.85rem;
+      color: #f1f5f9;
     }
   </style>
 </head>
 <body>
 
-  <div class="app-card">
-    <div class="header-tag">Anti-Feedback & Screen Lock Active</div>
-    <h1>Live Mic Pro</h1>
-    <p class="subtitle">Connect Bluetooth Speaker & Tap Start</p>
+  <div class="card">
+    <h1>లైవ్ మైక్ (Live Mic)</h1>
+    <p>బ్లూటూత్ స్పీకర్ కనెక్ట్ చేసి బటన్ నొక్కండి</p>
 
-    <!-- Hidden audio element for Bluetooth Media routing -->
-    <audio id="livePlayer" autoplay playsinline></audio>
+    <button id="toggleBtn" class="mic-btn">మైక్ ఆన్</button>
 
-    <div class="mic-container">
-      <button id="toggleBtn" class="mic-button">
-        <svg class="mic-icon" viewBox="0 0 24 24">
-          <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
-          <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
-        </svg>
-        <span id="btnText">START</span>
-      </button>
+    <div class="slider-container">
+      <label for="gainSlider">వాల్యూమ్ బూస్ట్: <span id="gainValue">1x</span></label>
+      <input type="range" id="gainSlider" min="0.5" max="3" step="0.1" value="1">
     </div>
 
-    <div class="control-panel">
-      <!-- Voice Effects Selector -->
-      <div class="control-box">
-        <div class="control-label">
-          <span>Voice Effect Profile</span>
-        </div>
-        <select id="voiceEffectSelect">
-          <option value="crystal">Crystal Clean (Anti-Feedback)</option>
-          <option value="deep">Deep Voice (Bass Boost)</option>
-          <option value="megaphone">Loud Megaphone / Stage</option>
-          <option value="robot">Cyber Robot / Metallic</option>
-        </select>
-      </div>
-
-      <!-- Gain / Volume Booster -->
-      <div class="control-box">
-        <div class="control-label">
-          <span>Output Gain Booster</span>
-          <span id="gainValue" class="control-value">1.5x</span>
-        </div>
-        <input type="range" id="gainSlider" min="0.5" max="3.5" step="0.1" value="1.5">
-      </div>
-    </div>
-
-    <div class="status-bar">
-      <div id="statusIndicator" class="indicator"></div>
-      <span id="statusText">System Ready (Mic Off)</span>
-    </div>
+    <div id="status" class="status">స్టేటస్: మైక్ ఆఫ్ చేయబడింది</div>
   </div>
 
   <script>
@@ -248,181 +106,84 @@
     let mediaStream = null;
     let sourceNode = null;
     let gainNode = null;
-    let highPassFilter = null;
-    let voiceClarityFilter = null;
-    let lowPassFilter = null;
-    let ringModulator = null;
-    let audioDestinationNode = null;
-    let wakeLock = null;
     let isRunning = false;
 
     const toggleBtn = document.getElementById('toggleBtn');
-    const btnText = document.getElementById('btnText');
-    const livePlayer = document.getElementById('livePlayer');
     const gainSlider = document.getElementById('gainSlider');
     const gainValue = document.getElementById('gainValue');
-    const voiceEffectSelect = document.getElementById('voiceEffectSelect');
-    const statusText = document.getElementById('statusText');
-    const statusIndicator = document.getElementById('statusIndicator');
+    const statusText = document.getElementById('status');
 
-    // Screen Wake Lock Management
-    async function activateWakeLock() {
-      try {
-        if ('wakeLock' in navigator) {
-          wakeLock = await navigator.wakeLock.request('screen');
-        }
-      } catch (err) {
-        console.warn('Wake Lock request failed:', err);
-      }
-    }
-
-    function releaseWakeLock() {
-      if (wakeLock) {
-        wakeLock.release().catch(() => {});
-        wakeLock = null;
-      }
-    }
-
-    // Gain Slider Event
     gainSlider.addEventListener('input', (e) => {
-      const val = parseFloat(e.target.value).toFixed(1);
+      const val = e.target.value;
       gainValue.innerText = `${val}x`;
-      if (gainNode && audioContext) {
+      if (gainNode) {
         gainNode.gain.setValueAtTime(parseFloat(val), audioContext.currentTime);
       }
     });
 
-    // Voice Effect Configuration
-    function applyVoiceEffect(profile) {
-      if (!audioContext || !highPassFilter || !voiceClarityFilter || !lowPassFilter) return;
-
-      const now = audioContext.currentTime;
-
-      if (profile === 'crystal') {
-        highPassFilter.frequency.setValueAtTime(100, now);
-        voiceClarityFilter.frequency.setValueAtTime(2500, now);
-        voiceClarityFilter.gain.setValueAtTime(4.0, now);
-        lowPassFilter.frequency.setValueAtTime(6500, now); // Feedback cut
-      } 
-      else if (profile === 'deep') {
-        highPassFilter.frequency.setValueAtTime(40, now);
-        voiceClarityFilter.frequency.setValueAtTime(160, now); // Low-end boost
-        voiceClarityFilter.gain.setValueAtTime(9.0, now);
-        lowPassFilter.frequency.setValueAtTime(4500, now);
-      } 
-      else if (profile === 'megaphone') {
-        highPassFilter.frequency.setValueAtTime(600, now); // Band-pass megaphone effect
-        voiceClarityFilter.frequency.setValueAtTime(1800, now);
-        voiceClarityFilter.gain.setValueAtTime(8.0, now);
-        lowPassFilter.frequency.setValueAtTime(3200, now);
-      } 
-      else if (profile === 'robot') {
-        highPassFilter.frequency.setValueAtTime(120, now);
-        voiceClarityFilter.frequency.setValueAtTime(1000, now);
-        voiceClarityFilter.gain.setValueAtTime(6.0, now);
-        lowPassFilter.frequency.setValueAtTime(5000, now);
-      }
-    }
-
-    voiceEffectSelect.addEventListener('change', (e) => {
-      applyVoiceEffect(e.target.value);
-    });
-
-    async function startBroadcasting() {
+    async function startMic() {
       try {
         const AudioContextClass = window.AudioContext || window.webkitAudioContext;
         audioContext = new AudioContextClass({ latencyHint: 'interactive' });
 
-        // Hardware Level Noise Cancelling & Feedback Suppression
+        // బ్రౌజర్‌లో మైక్ ఇన్‌పుట్ తీసుకోవడం (ఎకో అండ్ నాయిస్ తగ్గించే ఫీచర్స్ తో)
         mediaStream = await navigator.mediaDevices.getUserMedia({
           audio: {
-            echoCancellation: true,
+            echoCancellation: false, // లైవ్ ఆడియో డీలే తగ్గించడానికి
             noiseSuppression: true,
             autoGainControl: true,
-            channelCount: 1,
-            sampleRate: 48000
+            latency: 0
           }
         });
 
         sourceNode = audioContext.createMediaStreamSource(mediaStream);
-
-        // DSP Filter Chain
-        highPassFilter = audioContext.createBiquadFilter();
-        highPassFilter.type = 'highpass';
-
-        voiceClarityFilter = audioContext.createBiquadFilter();
-        voiceClarityFilter.type = 'peaking';
-        voiceClarityFilter.Q.setValueAtTime(1.5, audioContext.currentTime);
-
-        lowPassFilter = audioContext.createBiquadFilter();
-        lowPassFilter.type = 'lowpass';
-
         gainNode = audioContext.createGain();
+
         gainNode.gain.setValueAtTime(parseFloat(gainSlider.value), audioContext.currentTime);
 
-        applyVoiceEffect(voiceEffectSelect.value);
-
-        // Bridge to HTML5 Audio Player (Routes through Bluetooth Media A2DP Stream)
-        audioDestinationNode = audioContext.createMediaStreamDestination();
-
-        sourceNode.connect(highPassFilter);
-        highPassFilter.connect(voiceClarityFilter);
-        voiceClarityFilter.connect(lowPassFilter);
-        lowPassFilter.connect(gainNode);
-        gainNode.connect(audioDestinationNode);
-
-        livePlayer.srcObject = audioDestinationNode.stream;
-        await livePlayer.play();
+        // మైక్ నుండి వచ్చిన ఆడియోను స్పీకర్ కి పంపడం
+        sourceNode.connect(gainNode);
+        gainNode.connect(audioContext.destination);
 
         if (audioContext.state === 'suspended') {
           await audioContext.resume();
         }
 
-        // Lock Screen to stay ON
-        await activateWakeLock();
-
         isRunning = true;
-        btnText.innerText = "STOP";
+        toggleBtn.innerText = "మైక్ ఆఫ్";
         toggleBtn.classList.add('active');
-        statusIndicator.classList.add('active');
-        statusText.innerText = "Broadcasting Live to Speaker • Screen Locked On";
+        statusText.innerText = "స్టేటస్: మైక్ లైవ్‌లో ఉంది 🔴";
       } catch (err) {
-        console.error("Audio Initialization Error:", err);
-        statusText.innerText = "Error: Please allow Microphone access";
+        console.error("Mic Access Error:", err);
+        statusText.innerText = "ఎర్రర్: మైక్రోఫోన్ అనుమతి ఇవ్వండి";
       }
     }
 
-    function stopBroadcasting() {
+    function stopMic() {
       if (mediaStream) {
         mediaStream.getTracks().forEach(track => track.stop());
       }
-      if (livePlayer) {
-        livePlayer.srcObject = null;
+      if (sourceNode) {
+        sourceNode.disconnect();
       }
-      if (audioContext && audioContext.state !== 'closed') {
+      if (gainNode) {
+        gainNode.disconnect();
+      }
+      if (audioContext) {
         audioContext.close();
       }
 
-      releaseWakeLock();
-
       isRunning = false;
-      btnText.innerText = "START";
+      toggleBtn.innerText = "మైక్ ఆన్";
       toggleBtn.classList.remove('active');
-      statusIndicator.classList.remove('active');
-      statusText.innerText = "Broadcasting Stopped (Mic Off)";
+      statusText.innerText = "స్టేటస్: మైక్ ఆఫ్ చేయబడింది";
     }
 
     toggleBtn.addEventListener('click', async () => {
       if (!isRunning) {
-        await startBroadcasting();
+        await startMic();
       } else {
-        stopBroadcasting();
-      }
-    });
-
-    document.addEventListener('visibilitychange', async () => {
-      if (document.visibilityState === 'visible' && isRunning) {
-        await activateWakeLock();
+        stopMic();
       }
     });
   </script>
