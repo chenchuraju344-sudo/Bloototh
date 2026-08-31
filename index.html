@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>లైవ్ బ్లూటూత్ మైక్ - Live Mic</title>
+  <title>లైవ్ బ్లూటూత్ మైక్ ప్రో - Live Mic Pro</title>
   <style>
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: system-ui, -apple-system, sans-serif;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
     body {
       background-color: #0f172a;
@@ -22,80 +22,108 @@
     }
     .card {
       background: #1e293b;
-      padding: 30px;
-      border-radius: 20px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      padding: 30px 24px;
+      border-radius: 24px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
       width: 100%;
-      max-width: 400px;
+      max-width: 420px;
       text-align: center;
+      border: 1px solid #334155;
     }
     h1 {
       font-size: 1.5rem;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
       color: #38bdf8;
+      font-weight: 700;
     }
     p {
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       color: #94a3b8;
       margin-bottom: 25px;
     }
     .mic-btn {
-      width: 120px;
-      height: 120px;
+      width: 130px;
+      height: 130px;
       border-radius: 50%;
       border: none;
-      background: #ef4444;
+      background: linear-gradient(135deg, #ef4444, #dc2626);
       color: white;
-      font-size: 1.1rem;
+      font-size: 1.15rem;
       font-weight: bold;
       cursor: pointer;
-      box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+      box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
       transition: all 0.3s ease;
       display: flex;
       justify-content: center;
       align-items: center;
       margin: 0 auto 25px auto;
+      outline: none;
     }
     .mic-btn.active {
-      background: #22c55e;
-      box-shadow: 0 0 25px rgba(34, 197, 94, 0.7);
-      transform: scale(1.05);
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      box-shadow: 0 0 30px rgba(34, 197, 94, 0.6);
+      transform: scale(1.04);
     }
-    .slider-container {
-      margin: 20px 0;
+    .control-group {
+      margin-bottom: 20px;
       text-align: left;
+      background: #0f172a;
+      padding: 12px 16px;
+      border-radius: 12px;
+      border: 1px solid #334155;
     }
     label {
-      display: block;
+      display: flex;
+      justify-content: space-between;
       font-size: 0.85rem;
       margin-bottom: 8px;
       color: #cbd5e1;
+      font-weight: 500;
     }
     input[type="range"] {
       width: 100%;
       accent-color: #38bdf8;
+      cursor: pointer;
+    }
+    .feature-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      background: #1e3a8a;
+      color: #93c5fd;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      margin-bottom: 18px;
     }
     .status {
       margin-top: 15px;
-      padding: 10px;
-      border-radius: 8px;
+      padding: 12px;
+      border-radius: 10px;
       background: #334155;
       font-size: 0.85rem;
       color: #f1f5f9;
+      font-weight: 500;
     }
   </style>
 </head>
 <body>
 
   <div class="card">
-    <h1>లైవ్ మైక్ (Live Mic)</h1>
-    <p>బ్లూటూత్ స్పీకర్ కనెక్ట్ చేసి బటన్ నొక్కండి</p>
+    <div class="feature-badge">
+      <span>🛡️ AI నాయిస్ ఫిల్టర్ & స్క్రీన్ ఆన్ లాక్</span>
+    </div>
+    <h1>లైవ్ బ్లూటూత్ మైక్</h1>
+    <p>బ్లూటూత్ స్పీకర్ కనెక్ట్ చేసి మాట్లాడండి</p>
 
     <button id="toggleBtn" class="mic-btn">మైక్ ఆన్</button>
 
-    <div class="slider-container">
-      <label for="gainSlider">వాల్యూమ్ బూస్ట్: <span id="gainValue">1x</span></label>
-      <input type="range" id="gainSlider" min="0.5" max="3" step="0.1" value="1">
+    <div class="control-group">
+      <label for="gainSlider">
+        <span>వాల్యూమ్ బూస్ట్</span>
+        <span id="gainValue" style="color: #38bdf8;">1.0x</span>
+      </label>
+      <input type="range" id="gainSlider" min="0.5" max="3" step="0.1" value="1.0">
     </div>
 
     <div id="status" class="status">స్టేటస్: మైక్ ఆఫ్ చేయబడింది</div>
@@ -106,6 +134,10 @@
     let mediaStream = null;
     let sourceNode = null;
     let gainNode = null;
+    let highPassFilter = null;
+    let lowPassFilter = null;
+    let clarityFilter = null;
+    let wakeLock = null;
     let isRunning = false;
 
     const toggleBtn = document.getElementById('toggleBtn');
@@ -113,10 +145,30 @@
     const gainValue = document.getElementById('gainValue');
     const statusText = document.getElementById('status');
 
+    // స్క్రీన్ ఆఫ్ అవ్వకుండా ఉండటానికి వేక్ లాక్ ఫంక్షన్
+    async function requestWakeLock() {
+      try {
+        if ('wakeLock' in navigator) {
+          wakeLock = await navigator.wakeLock.request('screen');
+        }
+      } catch (err) {
+        console.warn('Wake Lock Error:', err);
+      }
+    }
+
+    function releaseWakeLock() {
+      if (wakeLock !== null) {
+        wakeLock.release().then(() => {
+          wakeLock = null;
+        }).catch(() => {});
+      }
+    }
+
+    // వాల్యూమ్ స్లైడర్ మార్పులను అప్లై చేయడం
     gainSlider.addEventListener('input', (e) => {
-      const val = e.target.value;
+      const val = parseFloat(e.target.value).toFixed(1);
       gainValue.innerText = `${val}x`;
-      if (gainNode) {
+      if (gainNode && audioContext) {
         gainNode.gain.setValueAtTime(parseFloat(val), audioContext.currentTime);
       }
     });
@@ -126,36 +178,61 @@
         const AudioContextClass = window.AudioContext || window.webkitAudioContext;
         audioContext = new AudioContextClass({ latencyHint: 'interactive' });
 
-        // బ్రౌజర్‌లో మైక్ ఇన్‌పుట్ తీసుకోవడం (ఎకో అండ్ నాయిస్ తగ్గించే ఫీచర్స్ తో)
+        // హై-క్వాలిటీ ఆడియో స్ట్రీమ్ & నాయిస్ క్యాన్సిలేషన్ పారామీటర్లు
         mediaStream = await navigator.mediaDevices.getUserMedia({
           audio: {
-            echoCancellation: false, // లైవ్ ఆడియో డీలే తగ్గించడానికి
+            echoCancellation: true,
             noiseSuppression: true,
             autoGainControl: true,
-            latency: 0
+            channelCount: 1,
+            sampleRate: 48000
           }
         });
 
         sourceNode = audioContext.createMediaStreamSource(mediaStream);
-        gainNode = audioContext.createGain();
 
+        // 1. హై-పాస్ ఫిల్టర్: గాలి రొద, లో-ఎండ్ బజ్జింగ్ నాయిస్ తొలగిస్తుంది
+        highPassFilter = audioContext.createBiquadFilter();
+        highPassFilter.type = 'highpass';
+        highPassFilter.frequency.setValueAtTime(85, audioContext.currentTime);
+
+        // 2. క్లారిటీ బూస్ట్ ఫిల్టర్: గొంతు చాలా స్పష్టంగా, బలంగా వినపడేలా చేస్తుంది
+        clarityFilter = audioContext.createBiquadFilter();
+        clarityFilter.type = 'peaking';
+        clarityFilter.frequency.setValueAtTime(2500, audioContext.currentTime);
+        clarityFilter.Q.setValueAtTime(1.2, audioContext.currentTime);
+        clarityFilter.gain.setValueAtTime(3.0, audioContext.currentTime);
+
+        // 3. లో-పాస్ ఫిల్టర్: స్పీకర్ దగ్గర ఉన్నప్పుడు వచ్చే తీవ్రమైన ఈల/విజిల్ సౌండ్ కట్ చేస్తుంది
+        lowPassFilter = audioContext.createBiquadFilter();
+        lowPassFilter.type = 'lowpass';
+        lowPassFilter.frequency.setValueAtTime(7500, audioContext.currentTime);
+
+        // 4. వాల్యూమ్ గెయిన్ కంట్రోల్
+        gainNode = audioContext.createGain();
         gainNode.gain.setValueAtTime(parseFloat(gainSlider.value), audioContext.currentTime);
 
-        // మైక్ నుండి వచ్చిన ఆడియోను స్పీకర్ కి పంపడం
-        sourceNode.connect(gainNode);
+        // సిగ్నల్ ప్రాసెసింగ్ చైన్ కనెక్షన్
+        sourceNode.connect(highPassFilter);
+        highPassFilter.connect(clarityFilter);
+        clarityFilter.connect(lowPassFilter);
+        lowPassFilter.connect(gainNode);
         gainNode.connect(audioContext.destination);
 
         if (audioContext.state === 'suspended') {
           await audioContext.resume();
         }
 
+        // స్క్రీన్ లాక్ ఆన్ చేయండి
+        await requestWakeLock();
+
         isRunning = true;
         toggleBtn.innerText = "మైక్ ఆఫ్";
         toggleBtn.classList.add('active');
-        statusText.innerText = "స్టేటస్: మైక్ లైవ్‌లో ఉంది 🔴";
+        statusText.innerText = "స్టేటస్: మైక్ లైవ్‌లో ఉంది 🔴 (స్క్రీన్ ఆన్ లో ఉంటుంది)";
       } catch (err) {
         console.error("Mic Access Error:", err);
-        statusText.innerText = "ఎర్రర్: మైక్రోఫోన్ అనుమతి ఇవ్వండి";
+        statusText.innerText = "ఎర్రర్: మైక్రోఫోన్ అనుమతి (Permission) ఇవ్వండి";
       }
     }
 
@@ -163,15 +240,17 @@
       if (mediaStream) {
         mediaStream.getTracks().forEach(track => track.stop());
       }
-      if (sourceNode) {
-        sourceNode.disconnect();
-      }
-      if (gainNode) {
-        gainNode.disconnect();
-      }
-      if (audioContext) {
+      if (sourceNode) sourceNode.disconnect();
+      if (highPassFilter) highPassFilter.disconnect();
+      if (clarityFilter) clarityFilter.disconnect();
+      if (lowPassFilter) lowPassFilter.disconnect();
+      if (gainNode) gainNode.disconnect();
+      if (audioContext && audioContext.state !== 'closed') {
         audioContext.close();
       }
+
+      // స్క్రీన్ వేక్ లాక్ రిలీజ్ చేయండి
+      releaseWakeLock();
 
       isRunning = false;
       toggleBtn.innerText = "మైక్ ఆన్";
@@ -184,6 +263,13 @@
         await startMic();
       } else {
         stopMic();
+      }
+    });
+
+    // యాప్ మినిమైజ్ అయినా లేదా ట్యాబ్ మారినా సేఫ్టీ రిలీజ్
+    document.addEventListener('visibilitychange', async () => {
+      if (document.visibilityState === 'visible' && isRunning) {
+        await requestWakeLock();
       }
     });
   </script>
