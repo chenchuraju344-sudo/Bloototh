@@ -3,130 +3,43 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>లైవ్ బ్లూటూత్ మైక్ ప్రో - Live Mic Pro</title>
+  <title>లైవ్ బ్లూటూత్ మెగాఫోన్</title>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    }
-    body {
-      background-color: #0f172a;
-      color: #f8fafc;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      padding: 20px;
-    }
-    .card {
-      background: #1e293b;
-      padding: 30px 24px;
-      border-radius: 24px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-      width: 100%;
-      max-width: 420px;
-      text-align: center;
-      border: 1px solid #334155;
-    }
-    h1 {
-      font-size: 1.5rem;
-      margin-bottom: 8px;
-      color: #38bdf8;
-      font-weight: 700;
-    }
-    p {
-      font-size: 0.85rem;
-      color: #94a3b8;
-      margin-bottom: 25px;
-    }
-    .mic-btn {
-      width: 130px;
-      height: 130px;
-      border-radius: 50%;
-      border: none;
-      background: linear-gradient(135deg, #ef4444, #dc2626);
-      color: white;
-      font-size: 1.15rem;
-      font-weight: bold;
-      cursor: pointer;
-      box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
-      transition: all 0.3s ease;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin: 0 auto 25px auto;
-      outline: none;
-    }
-    .mic-btn.active {
-      background: linear-gradient(135deg, #22c55e, #16a34a);
-      box-shadow: 0 0 30px rgba(34, 197, 94, 0.6);
-      transform: scale(1.04);
-    }
-    .control-group {
-      margin-bottom: 20px;
-      text-align: left;
-      background: #0f172a;
-      padding: 12px 16px;
-      border-radius: 12px;
-      border: 1px solid #334155;
-    }
-    label {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.85rem;
-      margin-bottom: 8px;
-      color: #cbd5e1;
-      font-weight: 500;
-    }
-    input[type="range"] {
-      width: 100%;
-      accent-color: #38bdf8;
-      cursor: pointer;
-    }
-    .feature-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.75rem;
-      background: #1e3a8a;
-      color: #93c5fd;
-      padding: 4px 10px;
-      border-radius: 9999px;
-      margin-bottom: 18px;
-    }
-    .status {
-      margin-top: 15px;
-      padding: 12px;
-      border-radius: 10px;
-      background: #334155;
-      font-size: 0.85rem;
-      color: #f1f5f9;
-      font-weight: 500;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, sans-serif; }
+    body { background-color: #0f172a; color: #f8fafc; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+    .card { background: #1e293b; padding: 30px 20px; border-radius: 24px; width: 100%; max-width: 400px; text-align: center; border: 1px solid #334155; }
+    h1 { font-size: 1.4rem; color: #38bdf8; margin-bottom: 8px; }
+    p { font-size: 0.85rem; color: #94a3b8; margin-bottom: 20px; }
+    .mic-btn { width: 120px; height: 120px; border-radius: 50%; border: none; background: #ef4444; color: white; font-size: 1.1rem; font-weight: bold; cursor: pointer; margin: 0 auto 20px auto; display: block; box-shadow: 0 0 20px rgba(239, 68, 68, 0.4); }
+    .mic-btn.active { background: #22c55e; box-shadow: 0 0 30px rgba(34, 197, 94, 0.7); }
+    .select-box { margin-bottom: 15px; text-align: left; background: #0f172a; padding: 10px; border-radius: 10px; border: 1px solid #334155; }
+    label { font-size: 0.8rem; color: #cbd5e1; display: block; margin-bottom: 6px; }
+    select, input[type="range"] { width: 100%; background: #1e293b; color: white; border: 1px solid #475569; padding: 8px; border-radius: 6px; outline: none; }
+    .status { margin-top: 15px; padding: 10px; border-radius: 8px; background: #334155; font-size: 0.85rem; }
   </style>
 </head>
 <body>
 
   <div class="card">
-    <div class="feature-badge">
-      <span>🛡️ AI నాయిస్ ఫిల్టర్ & స్క్రీన్ ఆన్ లాక్</span>
-    </div>
-    <h1>లైవ్ బ్లూటూత్ మైక్</h1>
-    <p>బ్లూటూత్ స్పీకర్ కనెక్ట్ చేసి మాట్లాడండి</p>
+    <h1>బ్లూటూత్ లైవ్ స్పీకర్</h1>
+    <p>బ్లూటూత్ బాక్స్ కనెక్ట్ చేసి మాట్లాడండి</p>
+
+    <!-- బ్లూటూత్ మీడియా రూటింగ్ కోసం హిడెన్ ఆడియో ప్లేయర్ -->
+    <audio id="liveAudio" autoplay playsinline></audio>
 
     <button id="toggleBtn" class="mic-btn">మైక్ ఆన్</button>
 
-    <div class="control-group">
-      <label for="gainSlider">
-        <span>వాల్యూమ్ బూస్ట్</span>
-        <span id="gainValue" style="color: #38bdf8;">1.0x</span>
-      </label>
-      <input type="range" id="gainSlider" min="0.5" max="3" step="0.1" value="1.0">
+    <div class="select-box" id="deviceBox" style="display: none;">
+      <label for="audioOutput">ఆడియో స్పీకర్ ఎంచుకోండి:</label>
+      <select id="audioOutput"></select>
     </div>
 
-    <div id="status" class="status">స్టేటస్: మైక్ ఆఫ్ చేయబడింది</div>
+    <div class="select-box">
+      <label for="gainSlider">వాల్యూమ్ బూస్ట్: <span id="gainValue" style="color: #38bdf8;">1.5x</span></label>
+      <input type="range" id="gainSlider" min="0.5" max="3.5" step="0.1" value="1.5">
+    </div>
+
+    <div id="status" class="status">స్టేటస్: సిద్ధంగా ఉంది</div>
   </div>
 
   <script>
@@ -134,37 +47,61 @@
     let mediaStream = null;
     let sourceNode = null;
     let gainNode = null;
-    let highPassFilter = null;
-    let lowPassFilter = null;
-    let clarityFilter = null;
+    let audioDestinationNode = null;
     let wakeLock = null;
     let isRunning = false;
 
     const toggleBtn = document.getElementById('toggleBtn');
+    const audioElement = document.getElementById('liveAudio');
+    const audioOutputSelect = document.getElementById('audioOutput');
+    const deviceBox = document.getElementById('deviceBox');
     const gainSlider = document.getElementById('gainSlider');
     const gainValue = document.getElementById('gainValue');
     const statusText = document.getElementById('status');
 
-    // స్క్రీన్ ఆఫ్ అవ్వకుండా ఉండటానికి వేక్ లాక్ ఫంక్షన్
     async function requestWakeLock() {
       try {
         if ('wakeLock' in navigator) {
           wakeLock = await navigator.wakeLock.request('screen');
         }
-      } catch (err) {
-        console.warn('Wake Lock Error:', err);
-      }
+      } catch (e) {}
     }
 
     function releaseWakeLock() {
-      if (wakeLock !== null) {
-        wakeLock.release().then(() => {
-          wakeLock = null;
-        }).catch(() => {});
+      if (wakeLock) {
+        wakeLock.release().catch(() => {});
+        wakeLock = null;
       }
     }
 
-    // వాల్యూమ్ స్లైడర్ మార్పులను అప్లై చేయడం
+    async function populateOutputDevices() {
+      if (typeof audioElement.setSinkId !== 'undefined') {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const audioOutputs = devices.filter(d => d.kind === 'audiooutput');
+        
+        if (audioOutputs.length > 0) {
+          audioOutputSelect.innerHTML = '';
+          audioOutputs.forEach(device => {
+            const option = document.createElement('option');
+            option.value = device.deviceId;
+            option.text = device.label || `Speaker ${audioOutputSelect.length + 1}`;
+            audioOutputSelect.appendChild(option);
+          });
+          deviceBox.style.display = 'block';
+        }
+      }
+    }
+
+    audioOutputSelect.addEventListener('change', async () => {
+      if (typeof audioElement.setSinkId !== 'undefined') {
+        try {
+          await audioElement.setSinkId(audioOutputSelect.value);
+        } catch (err) {
+          console.error('Sink ID Error:', err);
+        }
+      }
+    });
+
     gainSlider.addEventListener('input', (e) => {
       const val = parseFloat(e.target.value).toFixed(1);
       gainValue.innerText = `${val}x`;
@@ -178,61 +115,59 @@
         const AudioContextClass = window.AudioContext || window.webkitAudioContext;
         audioContext = new AudioContextClass({ latencyHint: 'interactive' });
 
-        // హై-క్వాలిటీ ఆడియో స్ట్రీమ్ & నాయిస్ క్యాన్సిలేషన్ పారామీటర్లు
         mediaStream = await navigator.mediaDevices.getUserMedia({
           audio: {
             echoCancellation: true,
             noiseSuppression: true,
-            autoGainControl: true,
-            channelCount: 1,
-            sampleRate: 48000
+            autoGainControl: true
           }
         });
 
         sourceNode = audioContext.createMediaStreamSource(mediaStream);
 
-        // 1. హై-పాస్ ఫిల్టర్: గాలి రొద, లో-ఎండ్ బజ్జింగ్ నాయిస్ తొలగిస్తుంది
-        highPassFilter = audioContext.createBiquadFilter();
-        highPassFilter.type = 'highpass';
-        highPassFilter.frequency.setValueAtTime(85, audioContext.currentTime);
+        // నాయిస్ & విజిల్ ఫిల్టర్లు
+        const highPass = audioContext.createBiquadFilter();
+        highPass.type = 'highpass';
+        highPass.frequency.setValueAtTime(90, audioContext.currentTime);
 
-        // 2. క్లారిటీ బూస్ట్ ఫిల్టర్: గొంతు చాలా స్పష్టంగా, బలంగా వినపడేలా చేస్తుంది
-        clarityFilter = audioContext.createBiquadFilter();
-        clarityFilter.type = 'peaking';
-        clarityFilter.frequency.setValueAtTime(2500, audioContext.currentTime);
-        clarityFilter.Q.setValueAtTime(1.2, audioContext.currentTime);
-        clarityFilter.gain.setValueAtTime(3.0, audioContext.currentTime);
+        const voiceClarity = audioContext.createBiquadFilter();
+        voiceClarity.type = 'peaking';
+        voiceClarity.frequency.setValueAtTime(2400, audioContext.currentTime);
+        voiceClarity.gain.setValueAtTime(4.0, audioContext.currentTime);
 
-        // 3. లో-పాస్ ఫిల్టర్: స్పీకర్ దగ్గర ఉన్నప్పుడు వచ్చే తీవ్రమైన ఈల/విజిల్ సౌండ్ కట్ చేస్తుంది
-        lowPassFilter = audioContext.createBiquadFilter();
-        lowPassFilter.type = 'lowpass';
-        lowPassFilter.frequency.setValueAtTime(7500, audioContext.currentTime);
+        const lowPass = audioContext.createBiquadFilter();
+        lowPass.type = 'lowpass';
+        lowPass.frequency.setValueAtTime(7000, audioContext.currentTime);
 
-        // 4. వాల్యూమ్ గెయిన్ కంట్రోల్
         gainNode = audioContext.createGain();
         gainNode.gain.setValueAtTime(parseFloat(gainSlider.value), audioContext.currentTime);
 
-        // సిగ్నల్ ప్రాసెసింగ్ చైన్ కనెక్షన్
-        sourceNode.connect(highPassFilter);
-        highPassFilter.connect(clarityFilter);
-        clarityFilter.connect(lowPassFilter);
-        lowPassFilter.connect(gainNode);
-        gainNode.connect(audioContext.destination);
+        // బ్రౌజర్ ఆడియోను MediaStreamDestination కి పంపి HTML5 ఆడియో ద్వారా ప్లే చేయడం (బ్లూటూత్ మీడియా రూటింగ్ కోసం)
+        audioDestinationNode = audioContext.createMediaStreamDestination();
+
+        sourceNode.connect(highPass);
+        highPass.connect(voiceClarity);
+        voiceClarity.connect(lowPass);
+        lowPass.connect(gainNode);
+        gainNode.connect(audioDestinationNode);
+
+        audioElement.srcObject = audioDestinationNode.stream;
+        await audioElement.play();
 
         if (audioContext.state === 'suspended') {
           await audioContext.resume();
         }
 
-        // స్క్రీన్ లాక్ ఆన్ చేయండి
         await requestWakeLock();
+        await populateOutputDevices();
 
         isRunning = true;
         toggleBtn.innerText = "మైక్ ఆఫ్";
         toggleBtn.classList.add('active');
-        statusText.innerText = "స్టేటస్: మైక్ లైవ్‌లో ఉంది 🔴 (స్క్రీన్ ఆన్ లో ఉంటుంది)";
+        statusText.innerText = "లైవ్: సౌండ్ బాక్స్ కి కనెక్ట్ అయింది 🔊";
       } catch (err) {
-        console.error("Mic Access Error:", err);
-        statusText.innerText = "ఎర్రర్: మైక్రోఫోన్ అనుమతి (Permission) ఇవ్వండి";
+        console.error("Mic error:", err);
+        statusText.innerText = "ఎర్రర్: మైక్ పర్మిషన్ ఇవ్వండి";
       }
     }
 
@@ -240,16 +175,12 @@
       if (mediaStream) {
         mediaStream.getTracks().forEach(track => track.stop());
       }
-      if (sourceNode) sourceNode.disconnect();
-      if (highPassFilter) highPassFilter.disconnect();
-      if (clarityFilter) clarityFilter.disconnect();
-      if (lowPassFilter) lowPassFilter.disconnect();
-      if (gainNode) gainNode.disconnect();
+      if (audioElement) {
+        audioElement.srcObject = null;
+      }
       if (audioContext && audioContext.state !== 'closed') {
         audioContext.close();
       }
-
-      // స్క్రీన్ వేక్ లాక్ రిలీజ్ చేయండి
       releaseWakeLock();
 
       isRunning = false;
@@ -263,13 +194,6 @@
         await startMic();
       } else {
         stopMic();
-      }
-    });
-
-    // యాప్ మినిమైజ్ అయినా లేదా ట్యాబ్ మారినా సేఫ్టీ రిలీజ్
-    document.addEventListener('visibilitychange', async () => {
-      if (document.visibilityState === 'visible' && isRunning) {
-        await requestWakeLock();
       }
     });
   </script>
