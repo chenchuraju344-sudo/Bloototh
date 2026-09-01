@@ -198,7 +198,7 @@
     <div class="device-select-container">
       <label for="speakerSelect">🔊 Output Speaker (Bluetooth):</label>
       <select id="speakerSelect" class="device-select">
-        <option value="default">Default Speaker / Bluetooth</option>
+        <option value="default">Default / Connected Bluetooth Speaker</option>
       </select>
     </div>
 
@@ -240,6 +240,9 @@
     </div>
 
     <div id="status" class="status">Status: Microphone is OFF</div>
+
+    <!-- Hidden audio element strictly for Bluetooth Audio Stream Routing -->
+    <audio id="bluetoothAudioPlayer" playsinline autoplay></audio>
   </div>
 
   <script>
@@ -252,7 +255,6 @@
     let highpassFilter = null;
     let compressorNode = null;
     let analyserNode = null;
-    let audioOutputElement = null;
     let isRunning = false;
     let isMuted = false;
 
@@ -278,6 +280,7 @@
     const statusText = document.getElementById('status');
     const canvas = document.getElementById('visualizer');
     const canvasCtx = canvas.getContext('2d');
+    const bluetoothAudioPlayer = document.getElementById('bluetoothAudioPlayer');
 
     function resizeCanvas() {
       canvas.width = canvas.parentElement.clientWidth;
@@ -286,7 +289,6 @@
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
 
-    // Populate Available Output Devices (Bluetooth/Speakers)
     async function updateOutputDevices() {
       if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) return;
 
@@ -295,32 +297,31 @@
         const audioOutputs = devices.filter(device => device.kind === 'audiooutput');
 
         speakerSelect.innerHTML = '';
-        if (audioOutputs.length === 0) {
-          const opt = document.createElement('option');
-          opt.value = 'default';
-          opt.text = 'Bluetooth / Default Output';
-          speakerSelect.appendChild(opt);
-          return;
-        }
+        const defaultOpt = document.createElement('option');
+        defaultOpt.value = 'default';
+        defaultOpt.text = 'Connected Bluetooth Speaker / Default';
+        speakerSelect.appendChild(defaultOpt);
 
         audioOutputs.forEach((device, idx) => {
-          const opt = document.createElement('option');
-          opt.value = device.deviceId;
-          opt.text = device.label || `Speaker / Bluetooth ${idx + 1}`;
-          speakerSelect.appendChild(opt);
+          if (device.deviceId !== 'default') {
+            const opt = document.createElement('option');
+            opt.value = device.deviceId;
+            opt.text = device.label || `Bluetooth Device / Speaker ${idx + 1}`;
+            speakerSelect.appendChild(opt);
+          }
         });
       } catch (err) {
-        console.warn("Could not list audio devices:", err);
+        console.warn("Audio output enumeration error:", err);
       }
     }
 
     speakerSelect.addEventListener('change', async () => {
       const deviceId = speakerSelect.value;
-      if (audioOutputElement && typeof audioOutputElement.setSinkId === 'function') {
+      if (typeof bluetoothAudioPlayer.setSinkId === 'function') {
         try {
-          await audioOutputElement.setSinkId(deviceId);
+          await bluetoothAudioPlayer.setSinkId(deviceId);
         } catch (e) {
-          console.error("Sink ID routing error:", e);
+          console.error("setSinkId failed:", e);
         }
       }
     });
@@ -384,12 +385,12 @@
         const AudioContextClass = window.AudioContext || window.webkitAudioContext;
         audioContext = new AudioContextClass({ latencyHint: 'interactive' });
 
+        // Request clean stream without forcing communication profile
         mediaStream = await navigator.mediaDevices.getUserMedia({
           audio: {
-            echoCancellation: true,
-            noiseSuppression: true,
-            autoGainControl: false,
-            channelCount: 1
+            echoCancellation: false,
+            noiseSuppression: false,
+            autoGainControl: false
           }
         });
 
@@ -398,18 +399,18 @@
         sourceNode = audioContext.createMediaStreamSource(mediaStream);
         gainNode = audioContext.createGain();
 
-        // 1. Highpass Filter (85Hz)
+        // 1. Highpass Filter (85Hz) - removes phone mic handling rustle
         highpassFilter = audioContext.createBiquadFilter();
         highpassFilter.type = 'highpass';
         highpassFilter.frequency.value = 85;
 
-        // 2. Dynamics Compressor
+        // 2. Dynamics Compressor - protects against howling & whistling
         compressorNode = audioContext.createDynamicsCompressor();
-        compressorNode.threshold.setValueAtTime(-20, audioContext.currentTime);
-        compressorNode.knee.setValueAtTime(30, audioContext.currentTime);
-        compressorNode.ratio.setValueAtTime(10, audioContext.currentTime);
+        compressorNode.threshold.setValueAtTime(-18, audioContext.currentTime);
+        compressorNode.knee.setValueAtTime(25, audioContext.currentTime);
+        compressorNode.ratio.setValueAtTime(8, audioContext.currentTime);
         compressorNode.attack.setValueAtTime(0.003, audioContext.currentTime);
-        compressorNode.release.setValueAtTime(0.25, audioContext.currentTime);
+        compressorNode.release.setValueAtTime(0.2, audioContext.currentTime);
 
         // 3. Bass Filter
         bassNode = audioContext.createBiquadFilter();
@@ -429,28 +430,31 @@
 
         gainNode.gain.setValueAtTime(parseFloat(gainSlider.value), audioContext.currentTime);
 
-        // Signal Chain to MediaStreamDestination (Forces output to Bluetooth Speaker)
-        const destinationNode = audioContext.createMediaStreamDestination();
-        
+        // Signal Chain
         sourceNode.connect(highpassFilter);
         highpassFilter.connect(bassNode);
         bassNode.connect(clarityNode);
         clarityNode.connect(compressorNode);
         compressorNode.connect(gainNode);
-
         gainNode.connect(analyserNode);
-        gainNode.connect(destinationNode);
 
-        // Create dedicated Audio element for Bluetooth Sink routing
-        if (!audioOutputElement) {
-          audioOutputElement = new Audio();
+        // Route through MediaStreamDestination to HTMLAudioElement (forces OS Bluetooth Media routing)
+        const destination = audioContext.createMediaStreamDestination();
+        gainNode.connect(destination);
+
+        bluetoothAudioPlayer.srcObject = destination.stream;
+        bluetoothAudioPlayer.muted = false;
+        bluetoothAudioPlayer.volume = 1.0;
+
+        if (typeof bluetoothAudioPlayer.setSinkId === 'function' && speakerSelect.value !== 'default') {
+          try {
+            await bluetoothAudioPlayer.setSinkId(speakerSelect.value);
+          } catch(e) {
+            console.log("Direct setSinkId bypass:", e);
+          }
         }
-        audioOutputElement.srcObject = destinationNode.stream;
-        
-        if (typeof audioOutputElement.setSinkId === 'function' && speakerSelect.value !== 'default') {
-          await audioOutputElement.setSinkId(speakerSelect.value);
-        }
-        await audioOutputElement.play();
+
+        await bluetoothAudioPlayer.play();
 
         if (audioContext.state === 'suspended') {
           await audioContext.resume();
@@ -487,10 +491,10 @@
       if (mediaStream) {
         mediaStream.getTracks().forEach(track => track.stop());
       }
-      if (audioOutputElement) {
-        audioOutputElement.pause();
-        audioOutputElement.srcObject = null;
-      }
+
+      bluetoothAudioPlayer.pause();
+      bluetoothAudioPlayer.srcObject = null;
+
       if (sourceNode) sourceNode.disconnect();
       if (highpassFilter) highpassFilter.disconnect();
       if (bassNode) bassNode.disconnect();
@@ -594,7 +598,6 @@
       }
     }
 
-    // Check for device changes
     if (navigator.mediaDevices && navigator.mediaDevices.ondevicechange !== undefined) {
       navigator.mediaDevices.ondevicechange = updateOutputDevices;
     }
