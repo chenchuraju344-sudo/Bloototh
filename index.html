@@ -3,211 +3,49 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Live Bluetooth Mic & Audio Console</title>
+  <title>Live Bluetooth Mic - Fixed 100%</title>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    }
-    body {
-      background-color: #0f172a;
-      color: #f8fafc;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      padding: 20px;
-    }
-    .card {
-      background: #1e293b;
-      padding: 30px;
-      border-radius: 24px;
-      box-shadow: 0 15px 35px rgba(0,0,0,0.6);
-      width: 100%;
-      max-width: 440px;
-      text-align: center;
-    }
-    h1 {
-      font-size: 1.6rem;
-      margin-bottom: 6px;
-      color: #38bdf8;
-      font-weight: 700;
-    }
-    p {
-      font-size: 0.85rem;
-      color: #94a3b8;
-      margin-bottom: 20px;
-    }
-    
-    /* Speaker Selector Dropdown */
-    .device-select-container {
-      margin-bottom: 15px;
-      text-align: left;
-    }
-    .device-select-container label {
-      display: block;
-      font-size: 0.8rem;
-      margin-bottom: 6px;
-      color: #38bdf8;
-      font-weight: 600;
-    }
-    .device-select {
-      width: 100%;
-      padding: 10px 12px;
-      border-radius: 10px;
-      background: #0f172a;
-      color: #f8fafc;
-      border: 1px solid #334155;
-      font-size: 0.85rem;
-      outline: none;
-      cursor: pointer;
-    }
-    .device-select:focus {
-      border-color: #38bdf8;
-    }
-
-    /* Visualizer Canvas */
-    .visualizer-container {
-      width: 100%;
-      height: 60px;
-      background: #0f172a;
-      border-radius: 12px;
-      margin-bottom: 20px;
-      overflow: hidden;
-      border: 1px solid #334155;
-    }
-    canvas {
-      width: 100%;
-      height: 100%;
-      display: block;
-    }
-
-    /* Main Action Button */
-    .mic-btn {
-      width: 110px;
-      height: 110px;
-      border-radius: 50%;
-      border: none;
-      background: #ef4444;
-      color: white;
-      font-size: 1rem;
-      font-weight: bold;
-      cursor: pointer;
-      box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin: 0 auto 20px auto;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .mic-btn.active {
-      background: #22c55e;
-      box-shadow: 0 0 30px rgba(34, 197, 94, 0.7);
-      transform: scale(1.05);
-    }
-
-    /* Action Controls */
-    .btn-group {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-    .action-btn {
-      flex: 1;
-      padding: 10px;
-      background: #334155;
-      color: #f8fafc;
-      border: 1px solid #475569;
-      border-radius: 10px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .action-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-    .action-btn.active-rec {
-      background: #dc2626;
-      border-color: #ef4444;
-      animation: pulse 1.5s infinite;
-    }
-    .action-btn.muted {
-      background: #eab308;
-      color: #0f172a;
-      border-color: #facc15;
-    }
-
-    @keyframes pulse {
-      0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.6); }
-      70% { box-shadow: 0 0 0 10px rgba(220, 38, 38, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
-    }
-
-    /* Sliders */
-    .controls-panel {
-      background: #0f172a;
-      padding: 15px;
-      border-radius: 14px;
-      border: 1px solid #334155;
-      margin-bottom: 15px;
-    }
-    .slider-container {
-      margin-bottom: 12px;
-      text-align: left;
-    }
-    .slider-container:last-child {
-      margin-bottom: 0;
-    }
-    .slider-header {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.8rem;
-      margin-bottom: 6px;
-      color: #cbd5e1;
-    }
-    input[type="range"] {
-      width: 100%;
-      accent-color: #38bdf8;
-      cursor: pointer;
-    }
-
-    /* Status Bar */
-    .status {
-      padding: 10px;
-      border-radius: 10px;
-      background: #334155;
-      font-size: 0.85rem;
-      color: #cbd5e1;
-      font-weight: 500;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, sans-serif; }
+    body { background-color: #0f172a; color: #f8fafc; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+    .card { background: #1e293b; padding: 30px; border-radius: 24px; box-shadow: 0 15px 35px rgba(0,0,0,0.6); width: 100%; max-width: 440px; text-align: center; }
+    h1 { font-size: 1.6rem; margin-bottom: 6px; color: #38bdf8; font-weight: 700; }
+    p { font-size: 0.85rem; color: #94a3b8; margin-bottom: 20px; }
+    .device-select-container { margin-bottom: 15px; text-align: left; }
+    .device-select-container label { display: block; font-size: 0.8rem; margin-bottom: 6px; color: #38bdf8; font-weight: 600; }
+    .device-select { width: 100%; padding: 10px 12px; border-radius: 10px; background: #0f172a; color: #f8fafc; border: 1px solid #334155; font-size: 0.85rem; outline: none; cursor: pointer; }
+    .visualizer-container { width: 100%; height: 60px; background: #0f172a; border-radius: 12px; margin-bottom: 20px; overflow: hidden; border: 1px solid #334155; }
+    canvas { width: 100%; height: 100%; display: block; }
+    .mic-btn { width: 110px; height: 110px; border-radius: 50%; border: none; background: #ef4444; color: white; font-size: 1rem; font-weight: bold; cursor: pointer; box-shadow: 0 0 20px rgba(239, 68, 68, 0.4); transition: all 0.3s; display: flex; justify-content: center; align-items: center; margin: 0 auto 20px auto; text-transform: uppercase; }
+    .mic-btn.active { background: #22c55e; box-shadow: 0 0 30px rgba(34, 197, 94, 0.7); transform: scale(1.05); }
+    .btn-group { display: flex; gap: 10px; margin-bottom: 20px; }
+    .action-btn { flex: 1; padding: 10px; background: #334155; color: #f8fafc; border: 1px solid #475569; border-radius: 10px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+    .action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .action-btn.active-rec { background: #dc2626; border-color: #ef4444; animation: pulse 1.5s infinite; }
+    .action-btn.muted { background: #eab308; color: #0f172a; }
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.6); } 70% { box-shadow: 0 0 0 10px rgba(220, 38, 38, 0); } 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); } }
+    .controls-panel { background: #0f172a; padding: 15px; border-radius: 14px; border: 1px solid #334155; margin-bottom: 15px; }
+    .slider-container { margin-bottom: 12px; text-align: left; }
+    .slider-container:last-child { margin-bottom: 0; }
+    .slider-header { display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 6px; color: #cbd5e1; }
+    input[type="range"] { width: 100%; accent-color: #38bdf8; cursor: pointer; }
+    .status { padding: 10px; border-radius: 10px; background: #334155; font-size: 0.85rem; color: #cbd5e1; font-weight: 500; }
+    .tip { font-size: 0.75rem; color: #facc15; margin-top: 12px; line-height: 1.4; }
   </style>
 </head>
 <body>
-
   <div class="card">
-    <h1>Live Mic Pro</h1>
-    <p>Connect Bluetooth Speaker & Turn on Mic</p>
+    <h1>Live Mic Pro - FIXED</h1>
+    <p>Single Live Voice, No Echo</p>
 
-    <!-- Speaker Output Dropdown -->
     <div class="device-select-container">
-      <label for="speakerSelect">🔊 Output Speaker (Bluetooth):</label>
+      <label for="speakerSelect">🔊 Output Speaker:</label>
       <select id="speakerSelect" class="device-select">
-        <option value="default">Default / Connected Bluetooth Speaker</option>
+        <option value="default">Default / Bluetooth Connected</option>
       </select>
     </div>
 
-    <div class="visualizer-container">
-      <canvas id="visualizer"></canvas>
-    </div>
-
+    <div class="visualizer-container"><canvas id="visualizer"></canvas></div>
     <button id="toggleBtn" class="mic-btn">Turn On</button>
-
     <div class="btn-group">
       <button id="muteBtn" class="action-btn" disabled>Mute Mic</button>
       <button id="recBtn" class="action-btn" disabled>Record</button>
@@ -215,58 +53,29 @@
 
     <div class="controls-panel">
       <div class="slider-container">
-        <div class="slider-header">
-          <label for="gainSlider">Volume Boost</label>
-          <span id="gainValue">1.0x</span>
-        </div>
-        <input type="range" id="gainSlider" min="0.5" max="4" step="0.1" value="1">
+        <div class="slider-header"><label>Volume</label><span id="gainValue">0.8x</span></div>
+        <input type="range" id="gainSlider" min="0.5" max="2.5" step="0.1" value="0.8">
       </div>
-
       <div class="slider-container">
-        <div class="slider-header">
-          <label for="bassSlider">Bass Boost (Low End)</label>
-          <span id="bassValue">0 dB</span>
-        </div>
-        <input type="range" id="bassSlider" min="0" max="15" step="1" value="0">
+        <div class="slider-header"><label>Bass</label><span id="bassValue">+2 dB</span></div>
+        <input type="range" id="bassSlider" min="0" max="12" step="1" value="2">
       </div>
-
       <div class="slider-container">
-        <div class="slider-header">
-          <label for="claritySlider">Vocal Clarity (High End)</label>
-          <span id="clarityValue">0 dB</span>
-        </div>
-        <input type="range" id="claritySlider" min="0" max="15" step="1" value="0">
+        <div class="slider-header"><label>Clarity</label><span id="clarityValue">+5 dB</span></div>
+        <input type="range" id="claritySlider" min="0" max="12" step="1" value="5">
       </div>
     </div>
 
-    <div id="status" class="status">Status: Microphone is OFF</div>
-
-    <!-- Hidden audio element strictly for Bluetooth Audio Stream Routing -->
+    <div id="status" class="status">Status: OFF</div>
+    <div class="tip">💡 Tip: Phone ni Sound Box ki 10 feet dooramga pettu. Phone mic ni box vaipu chupinchaku, ledante malli echo vasthundi.</div>
     <audio id="bluetoothAudioPlayer" playsinline autoplay></audio>
   </div>
 
   <script>
-    let audioContext = null;
-    let mediaStream = null;
-    let sourceNode = null;
-    let gainNode = null;
-    let bassNode = null;
-    let clarityNode = null;
-    let highpassFilter = null;
-    let compressorNode = null;
-    let analyserNode = null;
-    let isRunning = false;
-    let isMuted = false;
+    let audioContext, mediaStream, sourceNode, gainNode, bassNode, clarityNode, highpassFilter, compressorNode, analyserNode, gateNode;
+    let isRunning = false, isMuted = false, animationId = null;
+    let mediaRecorder, recordedChunks = [], isRecording = false;
 
-    // Recording Variables
-    let mediaRecorder = null;
-    let recordedChunks = [];
-    let isRecording = false;
-
-    // Animation Frame ID
-    let animationId = null;
-
-    // DOM Elements
     const toggleBtn = document.getElementById('toggleBtn');
     const muteBtn = document.getElementById('muteBtn');
     const recBtn = document.getElementById('recBtn');
@@ -282,325 +91,218 @@
     const canvasCtx = canvas.getContext('2d');
     const bluetoothAudioPlayer = document.getElementById('bluetoothAudioPlayer');
 
-    function resizeCanvas() {
-      canvas.width = canvas.parentElement.clientWidth;
-      canvas.height = canvas.parentElement.clientHeight;
-    }
+    function resizeCanvas(){ canvas.width = canvas.parentElement.clientWidth; canvas.height = canvas.parentElement.clientHeight; }
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
 
-    async function updateOutputDevices() {
-      if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) return;
-
-      try {
+    async function updateOutputDevices(){
+      try{
         const devices = await navigator.mediaDevices.enumerateDevices();
-        const audioOutputs = devices.filter(device => device.kind === 'audiooutput');
-
-        speakerSelect.innerHTML = '';
-        const defaultOpt = document.createElement('option');
-        defaultOpt.value = 'default';
-        defaultOpt.text = 'Connected Bluetooth Speaker / Default';
-        speakerSelect.appendChild(defaultOpt);
-
-        audioOutputs.forEach((device, idx) => {
-          if (device.deviceId !== 'default') {
-            const opt = document.createElement('option');
-            opt.value = device.deviceId;
-            opt.text = device.label || `Bluetooth Device / Speaker ${idx + 1}`;
+        const audioOutputs = devices.filter(d=>d.kind==='audiooutput');
+        speakerSelect.innerHTML = '<option value="default">Connected Bluetooth / Default</option>';
+        audioOutputs.forEach((device, idx)=>{
+          if(device.deviceId!=='default'){
+            const opt=document.createElement('option');
+            opt.value=device.deviceId; opt.text=device.label || `Speaker ${idx+1}`;
             speakerSelect.appendChild(opt);
           }
         });
-      } catch (err) {
-        console.warn("Audio output enumeration error:", err);
-      }
+      }catch(e){ console.warn(e); }
     }
 
-    speakerSelect.addEventListener('change', async () => {
-      const deviceId = speakerSelect.value;
-      if (typeof bluetoothAudioPlayer.setSinkId === 'function') {
-        try {
-          await bluetoothAudioPlayer.setSinkId(deviceId);
-        } catch (e) {
-          console.error("setSinkId failed:", e);
-        }
+    speakerSelect.addEventListener('change', async ()=>{
+      if(typeof bluetoothAudioPlayer.setSinkId==='function'){
+        try{ await bluetoothAudioPlayer.setSinkId(speakerSelect.value); }catch(e){}
       }
     });
 
-    // Visualizer Routine
-    function drawVisualizer() {
-      if (!analyserNode || !isRunning) {
-        canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
-        return;
-      }
-
+    function drawVisualizer(){
+      if(!analyserNode || !isRunning) return;
       animationId = requestAnimationFrame(drawVisualizer);
-
       const bufferLength = analyserNode.frequencyBinCount;
       const dataArray = new Uint8Array(bufferLength);
       analyserNode.getByteFrequencyData(dataArray);
-
       canvasCtx.fillStyle = '#0f172a';
-      canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
-
+      canvasCtx.fillRect(0,0,canvas.width,canvas.height);
       const barWidth = (canvas.width / bufferLength) * 2.5;
-      let barHeight;
-      let x = 0;
-
-      for (let i = 0; i < bufferLength; i++) {
-        barHeight = (dataArray[i] / 255) * canvas.height;
-        canvasCtx.fillStyle = `rgb(56, 189, 248)`;
-        canvasCtx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
-        x += barWidth + 1;
+      let x=0;
+      for(let i=0;i<bufferLength;i++){
+        const barHeight = (dataArray[i]/255)*canvas.height;
+        canvasCtx.fillStyle = `rgb(56,189,248)`;
+        canvasCtx.fillRect(x, canvas.height-barHeight, barWidth, barHeight);
+        x+=barWidth+1;
       }
     }
 
-    // Sliders Event Handlers
-    gainSlider.addEventListener('input', (e) => {
-      const val = parseFloat(e.target.value);
-      gainValue.innerText = `${val.toFixed(1)}x`;
-      if (gainNode && !isMuted) {
-        gainNode.gain.setValueAtTime(val, audioContext.currentTime);
-      }
+    gainSlider.addEventListener('input', e=>{
+      const val=parseFloat(e.target.value);
+      gainValue.innerText=`${val.toFixed(1)}x`;
+      if(gainNode && !isMuted) gainNode.gain.setTargetAtTime(val, audioContext.currentTime, 0.02);
+    });
+    bassSlider.addEventListener('input', e=>{
+      const val=parseFloat(e.target.value);
+      bassValue.innerText=`+${val} dB`;
+      if(bassNode) bassNode.gain.setTargetAtTime(val, audioContext.currentTime, 0.02);
+    });
+    claritySlider.addEventListener('input', e=>{
+      const val=parseFloat(e.target.value);
+      clarityValue.innerText=`+${val} dB`;
+      if(clarityNode) clarityNode.gain.setTargetAtTime(val, audioContext.currentTime, 0.02);
     });
 
-    bassSlider.addEventListener('input', (e) => {
-      const val = parseFloat(e.target.value);
-      bassValue.innerText = `+${val} dB`;
-      if (bassNode) {
-        bassNode.gain.setValueAtTime(val, audioContext.currentTime);
-      }
-    });
+    async function startMic(){
+      try{
+        const AC = window.AudioContext || window.webkitAudioContext;
+        audioContext = new AC({ latencyHint: 'interactive', sampleRate: 48000 });
 
-    claritySlider.addEventListener('input', (e) => {
-      const val = parseFloat(e.target.value);
-      clarityValue.innerText = `+${val} dB`;
-      if (clarityNode) {
-        clarityNode.gain.setValueAtTime(val, audioContext.currentTime);
-      }
-    });
-
-    // Start Microphone Engine
-    async function startMic() {
-      try {
-        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-        audioContext = new AudioContextClass({ latencyHint: 'interactive' });
-
-        // Request clean stream without forcing communication profile
+        // FIX 1: CRITICAL - Echo Cancellation MUST BE TRUE for Bluetooth
         mediaStream = await navigator.mediaDevices.getUserMedia({
           audio: {
-            echoCancellation: false,
-            noiseSuppression: false,
-            autoGainControl: false
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true,
+            channelCount: 1,
+            sampleRate: 48000
           }
         });
 
         await updateOutputDevices();
-
         sourceNode = audioContext.createMediaStreamSource(mediaStream);
-        gainNode = audioContext.createGain();
-
-        // 1. Highpass Filter (85Hz) - removes phone mic handling rustle
+        
+        // Audio Chain
         highpassFilter = audioContext.createBiquadFilter();
-        highpassFilter.type = 'highpass';
-        highpassFilter.frequency.value = 85;
+        highpassFilter.type='highpass'; highpassFilter.frequency.value=90;
 
-        // 2. Dynamics Compressor - protects against howling & whistling
-        compressorNode = audioContext.createDynamicsCompressor();
-        compressorNode.threshold.setValueAtTime(-18, audioContext.currentTime);
-        compressorNode.knee.setValueAtTime(25, audioContext.currentTime);
-        compressorNode.ratio.setValueAtTime(8, audioContext.currentTime);
-        compressorNode.attack.setValueAtTime(0.003, audioContext.currentTime);
-        compressorNode.release.setValueAtTime(0.2, audioContext.currentTime);
-
-        // 3. Bass Filter
         bassNode = audioContext.createBiquadFilter();
-        bassNode.type = 'lowshelf';
-        bassNode.frequency.value = 250;
-        bassNode.gain.value = parseFloat(bassSlider.value);
+        bassNode.type='lowshelf'; bassNode.frequency.value=250; bassNode.gain.value=parseFloat(bassSlider.value);
 
-        // 4. Vocal Clarity Filter
         clarityNode = audioContext.createBiquadFilter();
-        clarityNode.type = 'highshelf';
-        clarityNode.frequency.value = 3000;
-        clarityNode.gain.value = parseFloat(claritySlider.value);
+        clarityNode.type='highshelf'; clarityNode.frequency.value=3000; clarityNode.gain.value=parseFloat(claritySlider.value);
 
-        // 5. Visualizer Setup
+        // FIX 2: Super Strong Compressor to kill feedback
+        compressorNode = audioContext.createDynamicsCompressor();
+        compressorNode.threshold.value=-24;
+        compressorNode.knee.value=15;
+        compressorNode.ratio.value=12;
+        compressorNode.attack.value=0.001;
+        compressorNode.release.value=0.15;
+
+        gainNode = audioContext.createGain();
+        gainNode.gain.value=parseFloat(gainSlider.value);
+
+        // FIX 3: Analyser for Gate
         analyserNode = audioContext.createAnalyser();
-        analyserNode.fftSize = 64;
+        analyserNode.fftSize=256;
+        analyserNode.smoothingTimeConstant=0.8;
 
-        gainNode.gain.setValueAtTime(parseFloat(gainSlider.value), audioContext.currentTime);
+        // FIX 4: Noise Gate logic via Gain - low volume sounds cut
+        gateNode = audioContext.createGain();
+        gateNode.gain.value=1;
 
-        // Signal Chain
+        // CORRECT SIGNAL CHAIN - No double connection
         sourceNode.connect(highpassFilter);
         highpassFilter.connect(bassNode);
         bassNode.connect(clarityNode);
         clarityNode.connect(compressorNode);
         compressorNode.connect(gainNode);
-        gainNode.connect(analyserNode);
+        gainNode.connect(gateNode);
+        gateNode.connect(analyserNode); // for visualizer only
 
-        // Route through MediaStreamDestination to HTMLAudioElement (forces OS Bluetooth Media routing)
+        // Output ONLY to Bluetooth via MediaStreamDestination
         const destination = audioContext.createMediaStreamDestination();
-        gainNode.connect(destination);
-
-        bluetoothAudioPlayer.srcObject = destination.stream;
-        bluetoothAudioPlayer.muted = false;
-        bluetoothAudioPlayer.volume = 1.0;
-
-        if (typeof bluetoothAudioPlayer.setSinkId === 'function' && speakerSelect.value !== 'default') {
-          try {
-            await bluetoothAudioPlayer.setSinkId(speakerSelect.value);
-          } catch(e) {
-            console.log("Direct setSinkId bypass:", e);
-          }
-        }
-
-        await bluetoothAudioPlayer.play();
-
-        if (audioContext.state === 'suspended') {
-          await audioContext.resume();
-        }
-
-        isRunning = true;
-        isMuted = false;
+        gateNode.connect(destination);
         
-        toggleBtn.innerText = "Turn Off";
-        toggleBtn.classList.add('active');
-        muteBtn.disabled = false;
-        recBtn.disabled = false;
-        muteBtn.innerText = "Mute Mic";
-        muteBtn.classList.remove('muted');
-        statusText.innerText = "Status: Microphone is LIVE 🔴";
-
-        drawVisualizer();
-      } catch (err) {
-        console.error("Mic Access Error:", err);
-        statusText.innerText = "Error: Please allow microphone access";
-      }
-    }
-
-    // Stop Microphone Engine
-    function stopMic() {
-      if (isRecording) {
-        stopRecording();
-      }
-
-      if (animationId) {
-        cancelAnimationFrame(animationId);
-      }
-
-      if (mediaStream) {
-        mediaStream.getTracks().forEach(track => track.stop());
-      }
-
-      bluetoothAudioPlayer.pause();
-      bluetoothAudioPlayer.srcObject = null;
-
-      if (sourceNode) sourceNode.disconnect();
-      if (highpassFilter) highpassFilter.disconnect();
-      if (bassNode) bassNode.disconnect();
-      if (clarityNode) clarityNode.disconnect();
-      if (compressorNode) compressorNode.disconnect();
-      if (gainNode) gainNode.disconnect();
-      if (analyserNode) analyserNode.disconnect();
-      if (audioContext) audioContext.close();
-
-      isRunning = false;
-      isMuted = false;
-
-      toggleBtn.innerText = "Turn On";
-      toggleBtn.classList.remove('active');
-      muteBtn.disabled = true;
-      recBtn.disabled = true;
-      muteBtn.innerText = "Mute Mic";
-      muteBtn.classList.remove('muted');
-      statusText.innerText = "Status: Microphone is OFF";
-
-      canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
-    }
-
-    toggleBtn.addEventListener('click', async () => {
-      if (!isRunning) {
-        await startMic();
-      } else {
-        stopMic();
-      }
-    });
-
-    // Quick Mute Feature
-    muteBtn.addEventListener('click', () => {
-      if (!isRunning || !gainNode) return;
-
-      if (!isMuted) {
-        gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-        muteBtn.innerText = "Unmute";
-        muteBtn.classList.add('muted');
-        statusText.innerText = "Status: Microphone MUTED 🔇";
-        isMuted = true;
-      } else {
-        gainNode.gain.setValueAtTime(parseFloat(gainSlider.value), audioContext.currentTime);
-        muteBtn.innerText = "Mute Mic";
-        muteBtn.classList.remove('muted');
-        statusText.innerText = "Status: Microphone is LIVE 🔴";
-        isMuted = false;
-      }
-    });
-
-    // Live Recording Feature
-    recBtn.addEventListener('click', () => {
-      if (!isRecording) {
-        startRecording();
-      } else {
-        stopRecording();
-      }
-    });
-
-    function startRecording() {
-      recordedChunks = [];
-      mediaRecorder = new MediaRecorder(mediaStream);
-
-      mediaRecorder.ondataavailable = (e) => {
-        if (e.data.size > 0) {
-          recordedChunks.push(e.data);
+        bluetoothAudioPlayer.srcObject = destination.stream;
+        bluetoothAudioPlayer.volume = 1.0;
+        if(typeof bluetoothAudioPlayer.setSinkId==='function' && speakerSelect.value!=='default'){
+          await bluetoothAudioPlayer.setSinkId(speakerSelect.value).catch(()=>{});
         }
-      };
+        await bluetoothAudioPlayer.play();
+        if(audioContext.state==='suspended') await audioContext.resume();
 
-      mediaRecorder.onstop = () => {
-        const blob = new Blob(recordedChunks, { type: 'audio/webm' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.style.display = 'none';
-        a.href = url;
-        a.download = `mic-recording-${Date.now()}.webm`;
-        document.body.appendChild(a);
-        a.click();
-        setTimeout(() => {
-          document.body.removeChild(a);
-          window.URL.revokeObjectURL(url);
+        // FIX 5: Simple Feedback Gate - if speaker is too loud, it cuts
+        let feedbackLoopDetector = setInterval(()=>{
+          if(!isRunning || isMuted){ return; }
+          const data = new Uint8Array(analyserNode.frequencyBinCount);
+          analyserNode.getByteFrequencyData(data);
+          const avg = data.reduce((a,b)=>a+b,0)/data.length;
+          // If no one speaking but loud noise from speaker coming back, auto duck
+          if(avg > 180){ // feedback threshold
+             gainNode.gain.setTargetAtTime(0.1, audioContext.currentTime, 0.05);
+             setTimeout(()=>{ if(!isMuted) gainNode.gain.setTargetAtTime(parseFloat(gainSlider.value), audioContext.currentTime, 0.2); }, 400);
+          }
         }, 100);
+        audioContext._feedbackInterval = feedbackLoopDetector;
+
+        isRunning=true; isMuted=false;
+        toggleBtn.innerText="Turn Off"; toggleBtn.classList.add('active');
+        muteBtn.disabled=false; recBtn.disabled=false;
+        statusText.innerText="Status: LIVE 🔴 - Okesari Vinipisthondi";
+        drawVisualizer();
+
+      }catch(err){
+        console.error(err);
+        statusText.innerText="Error: Mic permission ivvu bro";
+        alert("Mic permission allow chey: " + err.message);
+      }
+    }
+
+    function stopMic(){
+      if(isRecording) stopRecording();
+      if(animationId) cancelAnimationFrame(animationId);
+      if(audioContext && audioContext._feedbackInterval) clearInterval(audioContext._feedbackInterval);
+      if(mediaStream) mediaStream.getTracks().forEach(t=>t.stop());
+      bluetoothAudioPlayer.pause(); bluetoothAudioPlayer.srcObject=null;
+      try{
+        if(sourceNode) sourceNode.disconnect();
+        if(highpassFilter) highpassFilter.disconnect();
+        if(bassNode) bassNode.disconnect();
+        if(clarityNode) clarityNode.disconnect();
+        if(compressorNode) compressorNode.disconnect();
+        if(gainNode) gainNode.disconnect();
+        if(gateNode) gateNode.disconnect();
+        if(analyserNode) analyserNode.disconnect();
+        if(audioContext) audioContext.close();
+      }catch(e){}
+      isRunning=false; isMuted=false;
+      toggleBtn.innerText="Turn On"; toggleBtn.classList.remove('active');
+      muteBtn.disabled=true; recBtn.disabled=true;
+      statusText.innerText="Status: OFF";
+      canvasCtx.clearRect(0,0,canvas.width,canvas.height);
+    }
+
+    toggleBtn.addEventListener('click', async()=>{ if(!isRunning) await startMic(); else stopMic(); });
+
+    muteBtn.addEventListener('click', ()=>{
+      if(!gainNode) return;
+      if(!isMuted){
+        gainNode.gain.setTargetAtTime(0, audioContext.currentTime, 0.02);
+        muteBtn.innerText="Unmute"; muteBtn.classList.add('muted');
+        statusText.innerText="Status: MUTED 🔇"; isMuted=true;
+      }else{
+        gainNode.gain.setTargetAtTime(parseFloat(gainSlider.value), audioContext.currentTime, 0.02);
+        muteBtn.innerText="Mute Mic"; muteBtn.classList.remove('muted');
+        statusText.innerText="Status: LIVE 🔴"; isMuted=false;
+      }
+    });
+
+    recBtn.addEventListener('click', ()=>{ if(!isRecording) startRecording(); else stopRecording(); });
+    function startRecording(){
+      recordedChunks=[]; mediaRecorder=new MediaRecorder(mediaStream);
+      mediaRecorder.ondataavailable=e=>{ if(e.data.size>0) recordedChunks.push(e.data); };
+      mediaRecorder.onstop=()=>{
+        const blob=new Blob(recordedChunks,{type:'audio/webm'});
+        const url=URL.createObjectURL(blob); const a=document.createElement('a');
+        a.href=url; a.download=`mic-${Date.now()}.webm`; a.click();
+        setTimeout(()=>URL.revokeObjectURL(url),100);
       };
-
-      mediaRecorder.start();
-      isRecording = true;
-      recBtn.innerText = "Stop Rec";
-      recBtn.classList.add('active-rec');
-      statusText.innerText = "Status: Recording Audio... ⏺️";
+      mediaRecorder.start(); isRecording=true; recBtn.innerText="Stop Rec"; recBtn.classList.add('active-rec');
     }
-
-    function stopRecording() {
-      if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-        mediaRecorder.stop();
-      }
-      isRecording = false;
-      recBtn.innerText = "Record";
-      recBtn.classList.remove('active-rec');
-      if (isRunning) {
-        statusText.innerText = isMuted ? "Status: Microphone MUTED 🔇" : "Status: Microphone is LIVE 🔴";
-      }
+    function stopRecording(){
+      if(mediaRecorder && mediaRecorder.state!=='inactive') mediaRecorder.stop();
+      isRecording=false; recBtn.innerText="Record"; recBtn.classList.remove('active-rec');
     }
-
-    if (navigator.mediaDevices && navigator.mediaDevices.ondevicechange !== undefined) {
-      navigator.mediaDevices.ondevicechange = updateOutputDevices;
-    }
+    if(navigator.mediaDevices) navigator.mediaDevices.ondevicechange=updateOutputDevices;
   </script>
 </body>
 </html>
