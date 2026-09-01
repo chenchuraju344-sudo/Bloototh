@@ -2,228 +2,1680 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Live Mic to Bluetooth Box - 100% Fixed</title>
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+  >
+
+  <meta name="theme-color" content="#0f172a">
+
+  <title>Live Bluetooth Mic & Audio Console</title>
+
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, sans-serif; }
-    body { background-color: #0f172a; color: #f8fafc; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
-   .card { background: #1e293b; padding: 30px; border-radius: 24px; box-shadow: 0 15px 35px rgba(0,0,0,0.6); width: 100%; max-width: 440px; text-align: center; }
-    h1 { font-size: 1.6rem; margin-bottom: 6px; color: #38bdf8; font-weight: 700; }
-    p { font-size: 0.85rem; color: #94a3b8; margin-bottom: 20px; }
-   .device-select-container { margin-bottom: 15px; text-align: left; }
-   .device-select-container label { display: block; font-size: 0.8rem; margin-bottom: 6px; color: #38bdf8; font-weight: 600; }
-   .device-select { width: 100%; padding: 12px; border-radius: 10px; background: #0f172a; color: #f8fafc; border: 2px solid #38bdf8; font-size: 0.9rem; outline: none; cursor: pointer; }
-   .visualizer-container { width: 100%; height: 60px; background: #0f172a; border-radius: 12px; margin-bottom: 20px; overflow: hidden; border: 1px solid #334155; }
-    canvas { width: 100%; height: 100%; display: block; }
-   .mic-btn { width: 120px; height: 120px; border-radius: 50%; border: none; background: #ef4444; color: white; font-size: 1.1rem; font-weight: bold; cursor: pointer; box-shadow: 0 0 20px rgba(239, 68, 68, 0.4); transition: all 0.3s; display: flex; justify-content: center; align-items: center; margin: 0 auto 20px auto; text-transform: uppercase; }
-   .mic-btn.active { background: #22c55e; box-shadow: 0 0 30px rgba(34, 197, 94, 0.7); }
-   .btn-group { display: flex; gap: 10px; margin-bottom: 20px; }
-   .action-btn { flex: 1; padding: 10px; background: #334155; color: #f8fafc; border: 1px solid #475569; border-radius: 10px; font-size: 0.85rem; font-weight: 600; cursor: pointer; }
-   .action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-   .status { padding: 12px; border-radius: 10px; background: #334155; font-size: 0.85rem; color: #cbd5e1; font-weight: 500; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family:
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        'Segoe UI',
+        Roboto,
+        Oxygen,
+        Ubuntu,
+        Cantarell,
+        sans-serif;
+    }
+
+    html,
+    body {
+      width: 100%;
+      min-height: 100%;
+    }
+
+    body {
+      background-color: #0f172a;
+      color: #f8fafc;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+      overflow-x: hidden;
+    }
+
+    .card {
+      background: #1e293b;
+      padding: 30px;
+      border-radius: 24px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+      width: 100%;
+      max-width: 440px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      margin-bottom: 6px;
+      color: #38bdf8;
+      font-weight: 700;
+    }
+
+    p {
+      font-size: 0.85rem;
+      color: #94a3b8;
+      margin-bottom: 20px;
+    }
+
+    /* Visualizer */
+    .visualizer-container {
+      width: 100%;
+      height: 60px;
+      background: #0f172a;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      overflow: hidden;
+      border: 1px solid #334155;
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* Main Mic Button */
+    .mic-btn {
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      border: none;
+      background: #ef4444;
+      color: white;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
+      transition:
+        all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0 auto 20px auto;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .mic-btn.active {
+      background: #22c55e;
+      box-shadow: 0 0 30px rgba(34, 197, 94, 0.7);
+      transform: scale(1.05);
+    }
+
+    .mic-btn:active {
+      transform: scale(0.96);
+    }
+
+    /* Action Controls */
+    .btn-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .action-btn {
+      flex: 1;
+      padding: 10px;
+      background: #334155;
+      color: #f8fafc;
+      border: 1px solid #475569;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .action-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .action-btn.active-rec {
+      background: #dc2626;
+      border-color: #ef4444;
+      animation: pulse 1.5s infinite;
+    }
+
+    .action-btn.muted {
+      background: #eab308;
+      color: #0f172a;
+      border-color: #facc15;
+    }
+
+    @keyframes pulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.6);
+      }
+
+      70% {
+        box-shadow: 0 0 0 10px rgba(220, 38, 38, 0);
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(220, 38, 38, 0);
+      }
+    }
+
+    /* Controls */
+    .controls-panel {
+      background: #0f172a;
+      padding: 15px;
+      border-radius: 14px;
+      border: 1px solid #334155;
+      margin-bottom: 15px;
+    }
+
+    .slider-container {
+      margin-bottom: 12px;
+      text-align: left;
+    }
+
+    .slider-container:last-child {
+      margin-bottom: 0;
+    }
+
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      margin-bottom: 6px;
+      color: #cbd5e1;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: #38bdf8;
+      cursor: pointer;
+    }
+
+    /* Status */
+    .status {
+      padding: 10px;
+      border-radius: 10px;
+      background: #334155;
+      font-size: 0.85rem;
+      color: #cbd5e1;
+      font-weight: 500;
+      min-height: 38px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
   </style>
 </head>
-<body>
-  <div class="card">
-    <h1>Live Mic Pro</h1>
-    <p>Voice ONLY from Bluetooth Box</p>
 
-    <div class="device-select-container">
-      <label for="speakerSelect">🔊 Step 1: Nee Bluetooth Box ni Select Chey:</label>
-      <select id="speakerSelect" class="device-select">
-        <option value="default">Loading Devices...</option>
-      </select>
+<body>
+
+  <div class="card">
+
+    <h1>Live Mic Pro</h1>
+
+    <p>
+      Connect Bluetooth Speaker & Turn on Mic
+    </p>
+
+    <div class="visualizer-container">
+      <canvas id="visualizer"></canvas>
     </div>
 
-    <div class="visualizer-container"><canvas id="visualizer"></canvas></div>
-    <button id="toggleBtn" class="mic-btn">Turn On</button>
+    <button id="toggleBtn" class="mic-btn">
+      Turn On
+    </button>
 
     <div class="btn-group">
-      <button id="muteBtn" class="action-btn" disabled>Mute</button>
-      <button id="testBtn" class="action-btn">Test Box</button>
+
+      <button
+        id="muteBtn"
+        class="action-btn"
+        disabled
+      >
+        Mute Mic
+      </button>
+
+      <button
+        id="recBtn"
+        class="action-btn"
+        disabled
+      >
+        Record
+      </button>
+
     </div>
 
-    <div id="status" class="status">Status: Mic OFF. Mundhu Box select chey</div>
-    <audio id="bluetoothAudioPlayer" playsinline autoplay style="display:none"></audio>
+    <div class="controls-panel">
+
+      <div class="slider-container">
+
+        <div class="slider-header">
+          <label for="gainSlider">
+            Volume Boost
+          </label>
+
+          <span id="gainValue">
+            1.0x
+          </span>
+        </div>
+
+        <input
+          type="range"
+          id="gainSlider"
+          min="0.5"
+          max="4"
+          step="0.1"
+          value="1"
+        >
+
+      </div>
+
+
+      <div class="slider-container">
+
+        <div class="slider-header">
+
+          <label for="bassSlider">
+            Bass Boost (Low End)
+          </label>
+
+          <span id="bassValue">
+            0 dB
+          </span>
+
+        </div>
+
+        <input
+          type="range"
+          id="bassSlider"
+          min="0"
+          max="15"
+          step="1"
+          value="0"
+        >
+
+      </div>
+
+
+      <div class="slider-container">
+
+        <div class="slider-header">
+
+          <label for="claritySlider">
+            Vocal Clarity (High End)
+          </label>
+
+          <span id="clarityValue">
+            0 dB
+          </span>
+
+        </div>
+
+        <input
+          type="range"
+          id="claritySlider"
+          min="0"
+          max="15"
+          step="1"
+          value="0"
+        >
+
+      </div>
+
+    </div>
+
+    <div id="status" class="status">
+      Status: Microphone is OFF
+    </div>
+
   </div>
 
-  <script>
-    let audioContext, mediaStream, sourceNode, gainNode, bassNode, clarityNode, highpassFilter, compressorNode, analyserNode;
-    let isRunning = false, animationId = null;
 
-    const toggleBtn = document.getElementById('toggleBtn');
-    const muteBtn = document.getElementById('muteBtn');
-    const testBtn = document.getElementById('testBtn');
-    const speakerSelect = document.getElementById('speakerSelect');
-    const statusText = document.getElementById('status');
-    const canvas = document.getElementById('visualizer');
-    const canvasCtx = canvas.getContext('2d');
-    const audioPlayer = document.getElementById('bluetoothAudioPlayer');
+<script>
 
-    function resizeCanvas(){ canvas.width = canvas.parentElement.clientWidth; canvas.height = canvas.parentElement.clientHeight; }
-    resizeCanvas();
+  /* =========================================================
+     AUDIO ENGINE
+     ========================================================= */
 
-    async function updateOutputDevices(){
-      try{
-        // Mic permission adigithe ne device labels vasthay
-        const devices = await navigator.mediaDevices.enumerateDevices();
-        const audioOutputs = devices.filter(d => d.kind === 'audiooutput');
-        speakerSelect.innerHTML = '';
-        audioOutputs.forEach((device, idx)=>{
-          const opt = document.createElement('option');
-          opt.value = device.deviceId;
-          // default device ni kuda chupisthundi
-          opt.text = device.label || (device.deviceId === 'default'? 'System Default (Phone Speaker)' : `Speaker ${idx+1}`);
-          if(device.label.toLowerCase().includes('bluetooth') || device.label.toLowerCase().includes('speaker') || device.label.toLowerCase().includes('boat') || device.label.toLowerCase().includes('jbl')){
-            opt.text = "🔵 " + opt.text + " [SELECT THIS]";
-          }
-          speakerSelect.appendChild(opt);
+  let audioContext = null;
+
+  let mediaStream = null;
+
+  let sourceNode = null;
+
+  let gainNode = null;
+
+  let bassNode = null;
+
+  let clarityNode = null;
+
+  let analyserNode = null;
+
+  let compressorNode = null;
+
+  let outputGainNode = null;
+
+  let isRunning = false;
+
+  let isMuted = false;
+
+
+  /* =========================================================
+     RECORDING
+     ========================================================= */
+
+  let mediaRecorder = null;
+
+  let recordedChunks = [];
+
+  let isRecording = false;
+
+
+  /* =========================================================
+     ANIMATION
+     ========================================================= */
+
+  let animationId = null;
+
+
+  /* =========================================================
+     DOM
+     ========================================================= */
+
+  const toggleBtn =
+    document.getElementById("toggleBtn");
+
+  const muteBtn =
+    document.getElementById("muteBtn");
+
+  const recBtn =
+    document.getElementById("recBtn");
+
+  const gainSlider =
+    document.getElementById("gainSlider");
+
+  const gainValue =
+    document.getElementById("gainValue");
+
+  const bassSlider =
+    document.getElementById("bassSlider");
+
+  const bassValue =
+    document.getElementById("bassValue");
+
+  const claritySlider =
+    document.getElementById("claritySlider");
+
+  const clarityValue =
+    document.getElementById("clarityValue");
+
+  const statusText =
+    document.getElementById("status");
+
+  const canvas =
+    document.getElementById("visualizer");
+
+  const canvasCtx =
+    canvas.getContext("2d");
+
+
+  /* =========================================================
+     CANVAS
+     ========================================================= */
+
+  function resizeCanvas() {
+
+    const rect =
+      canvas.parentElement.getBoundingClientRect();
+
+    const dpr =
+      Math.max(1, window.devicePixelRatio || 1);
+
+    canvas.width =
+      Math.floor(rect.width * dpr);
+
+    canvas.height =
+      Math.floor(rect.height * dpr);
+
+    canvasCtx.setTransform(
+      dpr,
+      0,
+      0,
+      dpr,
+      0,
+      0
+    );
+  }
+
+  resizeCanvas();
+
+  window.addEventListener(
+    "resize",
+    resizeCanvas,
+    { passive: true }
+  );
+
+
+  /* =========================================================
+     VISUALIZER
+     ========================================================= */
+
+  function drawVisualizer() {
+
+    if (!analyserNode || !isRunning) {
+
+      canvasCtx.clearRect(
+        0,
+        0,
+        canvas.clientWidth,
+        canvas.clientHeight
+      );
+
+      animationId = null;
+
+      return;
+    }
+
+    animationId =
+      requestAnimationFrame(drawVisualizer);
+
+    const bufferLength =
+      analyserNode.frequencyBinCount;
+
+    const dataArray =
+      new Uint8Array(bufferLength);
+
+    analyserNode.getByteFrequencyData(
+      dataArray
+    );
+
+    const width =
+      canvas.clientWidth;
+
+    const height =
+      canvas.clientHeight;
+
+    canvasCtx.fillStyle =
+      "#0f172a";
+
+    canvasCtx.fillRect(
+      0,
+      0,
+      width,
+      height
+    );
+
+    const barWidth =
+      Math.max(
+        2,
+        (width / bufferLength) * 2.5
+      );
+
+    let x = 0;
+
+    for (
+      let i = 0;
+      i < bufferLength;
+      i++
+    ) {
+
+      let barHeight =
+        (dataArray[i] / 255) * height;
+
+      /*
+       * Keep visualizer stable
+       * and avoid unnecessary rendering.
+       */
+
+      barHeight =
+        Math.max(1, barHeight);
+
+      canvasCtx.fillStyle =
+        "#38bdf8";
+
+      canvasCtx.fillRect(
+        x,
+        height - barHeight,
+        barWidth,
+        barHeight
+      );
+
+      x += barWidth + 1;
+
+      if (x > width) {
+        break;
+      }
+    }
+  }
+
+
+  /* =========================================================
+     SAFE AUDIO PARAMETER
+     ========================================================= */
+
+  function setAudioParam(
+    param,
+    value
+  ) {
+
+    if (
+      !param ||
+      !audioContext
+    ) {
+      return;
+    }
+
+    const now =
+      audioContext.currentTime;
+
+    try {
+
+      param.cancelScheduledValues(now);
+
+      param.setTargetAtTime(
+        value,
+        now,
+        0.015
+      );
+
+    } catch (e) {
+
+      try {
+
+        param.setValueAtTime(
+          value,
+          now
+        );
+
+      } catch (_) {}
+    }
+  }
+
+
+  /* =========================================================
+     GAIN SLIDER
+     ========================================================= */
+
+  gainSlider.addEventListener(
+    "input",
+    (e) => {
+
+      const val =
+        parseFloat(e.target.value);
+
+      gainValue.innerText =
+        `${val.toFixed(1)}x`;
+
+      if (
+        gainNode &&
+        !isMuted
+      ) {
+
+        setAudioParam(
+          gainNode.gain,
+          val
+        );
+      }
+    }
+  );
+
+
+  /* =========================================================
+     BASS
+     ========================================================= */
+
+  bassSlider.addEventListener(
+    "input",
+    (e) => {
+
+      const val =
+        parseFloat(e.target.value);
+
+      bassValue.innerText =
+        val === 0
+          ? "0 dB"
+          : `+${val} dB`;
+
+      if (bassNode) {
+
+        setAudioParam(
+          bassNode.gain,
+          val
+        );
+      }
+    }
+  );
+
+
+  /* =========================================================
+     CLARITY
+     ========================================================= */
+
+  claritySlider.addEventListener(
+    "input",
+    (e) => {
+
+      const val =
+        parseFloat(e.target.value);
+
+      clarityValue.innerText =
+        val === 0
+          ? "0 dB"
+          : `+${val} dB`;
+
+      if (clarityNode) {
+
+        setAudioParam(
+          clarityNode.gain,
+          val
+        );
+      }
+    }
+  );
+
+
+  /* =========================================================
+     START MICROPHONE
+     ========================================================= */
+
+  async function startMic() {
+
+    try {
+
+      if (
+        !navigator.mediaDevices ||
+        !navigator.mediaDevices.getUserMedia
+      ) {
+
+        statusText.innerText =
+          "Error: Microphone is not supported";
+
+        return;
+      }
+
+
+      /*
+       * Create AudioContext only once per start.
+       */
+
+      const AudioContextClass =
+        window.AudioContext ||
+        window.webkitAudioContext;
+
+      if (!AudioContextClass) {
+
+        statusText.innerText =
+          "Error: Web Audio is not supported";
+
+        return;
+      }
+
+
+      audioContext =
+        new AudioContextClass({
+          latencyHint: "interactive"
         });
-        if(audioOutputs.length === 0){
-          speakerSelect.innerHTML = '<option value="default">No Bluetooth Box Found - Phone Settings lo connect chey</option>';
-        }
-      }catch(e){ console.log(e); }
-    }
 
-    // Test button - Box lo sound vasthunda leda check chesukodaniki
-    testBtn.addEventListener('click', async ()=>{
-      try{
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        if(typeof ctx.setSinkId === 'function' && speakerSelect.value!== 'default'){
-          await ctx.setSinkId(speakerSelect.value);
-        }
-        const osc = ctx.createOscillator();
-        osc.frequency.value = 440;
-        osc.connect(ctx.destination);
-        osc.start();
-        setTimeout(()=>{ osc.stop(); ctx.close(); }, 500);
-        statusText.innerText = "Test Tone... Box lo vinipisthe OK ✅";
-        if(typeof audioPlayer.setSinkId === 'function' && speakerSelect.value){
-          await audioPlayer.setSinkId(speakerSelect.value).catch(()=>{});
-        }
-      }catch(e){
-        alert("Box select chey bro: " + e.message);
-      }
-    });
 
-    speakerSelect.addEventListener('change', async ()=>{
-      const id = speakerSelect.value;
-      if(typeof audioPlayer.setSinkId === 'function'){
-        try{ await audioPlayer.setSinkId(id); statusText.innerText = "Box Selected: " + speakerSelect.options[speakerSelect.selectedIndex].text; }catch(e){}
-      }
-      if(audioContext && typeof audioContext.setSinkId === 'function'){
-        try{ await audioContext.setSinkId(id); }catch(e){}
-      }
-    });
+      /*
+       * IMPORTANT:
+       *
+       * echoCancellation = TRUE
+       * noiseSuppression = TRUE
+       *
+       * These are specifically important
+       * when phone microphone + speaker are
+       * being used together.
+       *
+       * autoGainControl is disabled because
+       * aggressive automatic gain can increase
+       * feedback/noise in live mic situations.
+       */
 
-    function drawVisualizer(){
-      if(!analyserNode ||!isRunning) return;
-      animationId = requestAnimationFrame(drawVisualizer);
-      const bufferLength = analyserNode.frequencyBinCount;
-      const dataArray = new Uint8Array(bufferLength);
-      analyserNode.getByteFrequencyData(dataArray);
-      canvasCtx.fillStyle = '#0f172a';
-      canvasCtx.fillRect(0,0,canvas.width,canvas.height);
-      const barWidth = (canvas.width / bufferLength) * 2.5;
-      let x=0;
-      for(let i=0;i<bufferLength;i++){
-        const barHeight = (dataArray[i]/255)*canvas.height;
-        canvasCtx.fillStyle = '#38bdf8';
-        canvasCtx.fillRect(x, canvas.height-barHeight, barWidth, barHeight);
-        x+=barWidth+1;
-      }
-    }
+      mediaStream =
+        await navigator.mediaDevices.getUserMedia({
 
-    async function startMic(){
-      try{
-        const AC = window.AudioContext || window.webkitAudioContext;
-        audioContext = new AC({ latencyHint: 'interactive', sampleRate: 48000 });
-
-        // FIX: Force output to selected Bluetooth device
-        if(typeof audioContext.setSinkId === 'function' && speakerSelect.value && speakerSelect.value!== 'default'){
-          try{ await audioContext.setSinkId(speakerSelect.value); }catch(e){ console.log("AudioContext setSinkId failed", e); }
-        }
-
-        mediaStream = await navigator.mediaDevices.getUserMedia({
           audio: {
+
             echoCancellation: true,
+
             noiseSuppression: true,
+
             autoGainControl: false,
-            channelCount: 1
-          }
+
+            channelCount: 1,
+
+            sampleRate: {
+              ideal: 48000
+            },
+
+            sampleSize: {
+              ideal: 16
+            }
+
+          },
+
+          video: false
+
         });
 
-        await updateOutputDevices();
 
-        sourceNode = audioContext.createMediaStreamSource(mediaStream);
-        highpassFilter = audioContext.createBiquadFilter(); highpassFilter.type='highpass'; highpassFilter.frequency.value=85;
-        bassNode = audioContext.createBiquadFilter(); bassNode.type='lowshelf'; bassNode.frequency.value=250; bassNode.gain.value=2;
-        clarityNode = audioContext.createBiquadFilter(); clarityNode.type='highshelf'; clarityNode.frequency.value=3000; clarityNode.gain.value=5;
-        compressorNode = audioContext.createDynamicsCompressor(); compressorNode.threshold.value=-20; compressorNode.ratio.value=10;
-        gainNode = audioContext.createGain(); gainNode.gain.value=1.0;
-        analyserNode = audioContext.createAnalyser(); analyserNode.fftSize=256;
+      /*
+       * Resume immediately after user gesture.
+       */
 
-        // FINAL CORRECT CHAIN -> Goes to Bluetooth Box ONLY
-        sourceNode.connect(highpassFilter);
-        highpassFilter.connect(bassNode);
-        bassNode.connect(clarityNode);
-        clarityNode.connect(compressorNode);
-        compressorNode.connect(gainNode);
+      if (
+        audioContext.state === "suspended"
+      ) {
 
-        // 1. Connect to Visualizer
-        gainNode.connect(analyserNode);
-        // 2. Connect to MAIN OUTPUT (which is now Bluetooth Box because of setSinkId)
-        gainNode.connect(audioContext.destination);
+        await audioContext.resume();
+      }
 
-        // 3. Also connect via <audio> element for extra force routing (Android Chrome fix)
-        const dest = audioContext.createMediaStreamDestination();
-        gainNode.connect(dest);
-        audioPlayer.srcObject = dest.stream;
-        if(typeof audioPlayer.setSinkId === 'function' && speakerSelect.value){
-          await audioPlayer.setSinkId(speakerSelect.value).catch(()=>{});
-        }
-        await audioPlayer.play().catch(()=>{});
 
-        if(audioContext.state === 'suspended') await audioContext.resume();
+      /* =====================================================
+         SOURCE
+         ===================================================== */
 
-        isRunning=true;
-        toggleBtn.innerText="Turn Off"; toggleBtn.classList.add('active');
-        muteBtn.disabled=false;
-        statusText.innerText="LIVE 🔴 Box lone vasthondi - Phone dooram pettu";
-        drawVisualizer();
+      sourceNode =
+        audioContext.createMediaStreamSource(
+          mediaStream
+        );
 
-      }catch(err){
-        statusText.innerText="Error: Mic permission ivvu";
-        alert(err.message);
+
+      /* =====================================================
+         INPUT GAIN
+         ===================================================== */
+
+      gainNode =
+        audioContext.createGain();
+
+      gainNode.gain.value =
+        parseFloat(
+          gainSlider.value
+        );
+
+
+      /* =====================================================
+         BASS
+         ===================================================== */
+
+      bassNode =
+        audioContext.createBiquadFilter();
+
+      bassNode.type =
+        "lowshelf";
+
+      bassNode.frequency.value =
+        180;
+
+      bassNode.gain.value =
+        parseFloat(
+          bassSlider.value
+        );
+
+
+      /* =====================================================
+         VOCAL CLARITY
+         ===================================================== */
+
+      clarityNode =
+        audioContext.createBiquadFilter();
+
+      clarityNode.type =
+        "highshelf";
+
+      clarityNode.frequency.value =
+        3200;
+
+      clarityNode.gain.value =
+        parseFloat(
+          claritySlider.value
+        );
+
+
+      /* =====================================================
+         COMPRESSOR
+         =====================================================
+
+         Helps prevent sudden peaks from becoming
+         extremely loud and reduces harsh feedback.
+      */
+
+      compressorNode =
+        audioContext.createDynamicsCompressor();
+
+      compressorNode.threshold.value =
+        -18;
+
+      compressorNode.knee.value =
+        18;
+
+      compressorNode.ratio.value =
+        3;
+
+      compressorNode.attack.value =
+        0.003;
+
+      compressorNode.release.value =
+        0.12;
+
+
+      /* =====================================================
+         OUTPUT GAIN
+         ===================================================== */
+
+      outputGainNode =
+        audioContext.createGain();
+
+      outputGainNode.gain.value =
+        0.85;
+
+
+      /* =====================================================
+         ANALYSER
+         ===================================================== */
+
+      analyserNode =
+        audioContext.createAnalyser();
+
+      analyserNode.fftSize =
+        64;
+
+      analyserNode.smoothingTimeConstant =
+        0.75;
+
+
+      /* =====================================================
+         AUDIO CHAIN
+         =====================================================
+
+         MIC
+          ↓
+         BASS
+          ↓
+         CLARITY
+          ↓
+         VOLUME
+          ↓
+         COMPRESSOR
+          ↓
+         OUTPUT GAIN
+          ↓
+         ANALYSER
+          ↓
+         SPEAKER
+      */
+
+      sourceNode.connect(
+        bassNode
+      );
+
+      bassNode.connect(
+        clarityNode
+      );
+
+      clarityNode.connect(
+        gainNode
+      );
+
+      gainNode.connect(
+        compressorNode
+      );
+
+      compressorNode.connect(
+        outputGainNode
+      );
+
+      outputGainNode.connect(
+        analyserNode
+      );
+
+      analyserNode.connect(
+        audioContext.destination
+      );
+
+
+      /*
+       * Make sure audio is running.
+       */
+
+      if (
+        audioContext.state !== "running"
+      ) {
+
+        await audioContext.resume();
+      }
+
+
+      isRunning = true;
+
+      isMuted = false;
+
+
+      /* =====================================================
+         UI
+         ===================================================== */
+
+      toggleBtn.innerText =
+        "Turn Off";
+
+      toggleBtn.classList.add(
+        "active"
+      );
+
+      muteBtn.disabled =
+        false;
+
+      recBtn.disabled =
+        false;
+
+      muteBtn.innerText =
+        "Mute Mic";
+
+      muteBtn.classList.remove(
+        "muted"
+      );
+
+      statusText.innerText =
+        "Status: Microphone is LIVE 🔴";
+
+
+      if (animationId) {
+
+        cancelAnimationFrame(
+          animationId
+        );
+      }
+
+      drawVisualizer();
+
+
+    } catch (err) {
+
+      console.error(
+        "Mic Access Error:",
+        err
+      );
+
+
+      /*
+       * Clean failed start.
+       */
+
+      if (mediaStream) {
+
+        mediaStream
+          .getTracks()
+          .forEach(
+            track => track.stop()
+          );
+      }
+
+      if (audioContext) {
+
+        try {
+          await audioContext.close();
+        } catch (_) {}
+      }
+
+
+      audioContext = null;
+      mediaStream = null;
+      sourceNode = null;
+      gainNode = null;
+      bassNode = null;
+      clarityNode = null;
+      compressorNode = null;
+      outputGainNode = null;
+      analyserNode = null;
+
+
+      if (
+        err &&
+        (
+          err.name ===
+            "NotAllowedError" ||
+          err.name ===
+            "PermissionDeniedError"
+        )
+      ) {
+
+        statusText.innerText =
+          "Error: Please allow microphone access";
+
+      } else {
+
+        statusText.innerText =
+          "Error: Unable to start microphone";
       }
     }
+  }
 
-    function stopMic(){
-      if(animationId) cancelAnimationFrame(animationId);
-      if(mediaStream) mediaStream.getTracks().forEach(t=>t.stop());
-      if(audioContext) audioContext.close();
-      audioPlayer.pause(); audioPlayer.srcObject=null;
-      isRunning=false;
-      toggleBtn.innerText="Turn On"; toggleBtn.classList.remove('active');
-      statusText.innerText="OFF";
-      canvasCtx.clearRect(0,0,canvas.width,canvas.height);
+
+  /* =========================================================
+     STOP MICROPHONE
+     ========================================================= */
+
+  async function stopMic() {
+
+    if (isRecording) {
+
+      stopRecording();
     }
 
-    toggleBtn.addEventListener('click', async()=>{ if(!isRunning) await startMic(); else stopMic(); });
 
-    muteBtn.addEventListener('click', ()=>{
-      if(!gainNode) return;
-      if(gainNode.gain.value > 0){ gainNode.gain.value=0; muteBtn.innerText="Unmute"; }
-      else{ gainNode.gain.value=1.0; muteBtn.innerText="Mute"; }
-    });
+    isRunning = false;
 
-    // Load devices on start
-    navigator.mediaDevices.getUserMedia({audio:true}).then(s=>{
-      s.getTracks().forEach(t=>t.stop());
-      updateOutputDevices();
-    }).catch(()=> updateOutputDevices());
 
-    if(navigator.mediaDevices) navigator.mediaDevices.ondevicechange = updateOutputDevices;
-  </script>
+    if (animationId) {
+
+      cancelAnimationFrame(
+        animationId
+      );
+
+      animationId = null;
+    }
+
+
+    /*
+     * Stop physical microphone first.
+     */
+
+    if (mediaStream) {
+
+      mediaStream
+        .getTracks()
+        .forEach(
+          track => {
+
+            try {
+              track.stop();
+            } catch (_) {}
+
+          }
+        );
+    }
+
+
+    /*
+     * Disconnect nodes safely.
+     */
+
+    const nodes = [
+      sourceNode,
+      bassNode,
+      clarityNode,
+      gainNode,
+      compressorNode,
+      outputGainNode,
+      analyserNode
+    ];
+
+    nodes.forEach(
+      node => {
+
+        if (node) {
+
+          try {
+            node.disconnect();
+          } catch (_) {}
+
+        }
+
+      }
+    );
+
+
+    /*
+     * Close AudioContext.
+     */
+
+    if (audioContext) {
+
+      try {
+
+        await audioContext.close();
+
+      } catch (_) {}
+    }
+
+
+    audioContext = null;
+
+    mediaStream = null;
+
+    sourceNode = null;
+
+    gainNode = null;
+
+    bassNode = null;
+
+    clarityNode = null;
+
+    compressorNode = null;
+
+    outputGainNode = null;
+
+    analyserNode = null;
+
+    isMuted = false;
+
+
+    /* =====================================================
+       UI RESET
+       ===================================================== */
+
+    toggleBtn.innerText =
+      "Turn On";
+
+    toggleBtn.classList.remove(
+      "active"
+    );
+
+    muteBtn.disabled =
+      true;
+
+    recBtn.disabled =
+      true;
+
+    muteBtn.innerText =
+      "Mute Mic";
+
+    muteBtn.classList.remove(
+      "muted"
+    );
+
+    statusText.innerText =
+      "Status: Microphone is OFF";
+
+
+    canvasCtx.clearRect(
+      0,
+      0,
+      canvas.clientWidth,
+      canvas.clientHeight
+    );
+  }
+
+
+  /* =========================================================
+     TOGGLE
+     ========================================================= */
+
+  toggleBtn.addEventListener(
+    "click",
+    async () => {
+
+      if (!isRunning) {
+
+        await startMic();
+
+      } else {
+
+        await stopMic();
+      }
+
+    }
+  );
+
+
+  /* =========================================================
+     MUTE
+     ========================================================= */
+
+  muteBtn.addEventListener(
+    "click",
+    () => {
+
+      if (
+        !isRunning ||
+        !gainNode ||
+        !audioContext
+      ) {
+        return;
+      }
+
+
+      if (!isMuted) {
+
+        setAudioParam(
+          gainNode.gain,
+          0
+        );
+
+        muteBtn.innerText =
+          "Unmute";
+
+        muteBtn.classList.add(
+          "muted"
+        );
+
+        statusText.innerText =
+          "Status: Microphone MUTED 🔇";
+
+        isMuted = true;
+
+
+      } else {
+
+        const currentGain =
+          parseFloat(
+            gainSlider.value
+          );
+
+        setAudioParam(
+          gainNode.gain,
+          currentGain
+        );
+
+        muteBtn.innerText =
+          "Mute Mic";
+
+        muteBtn.classList.remove(
+          "muted"
+        );
+
+        statusText.innerText =
+          "Status: Microphone is LIVE 🔴";
+
+        isMuted = false;
+      }
+    }
+  );
+
+
+  /* =========================================================
+     RECORDING
+     ========================================================= */
+
+  recBtn.addEventListener(
+    "click",
+    () => {
+
+      if (!isRecording) {
+
+        startRecording();
+
+      } else {
+
+        stopRecording();
+      }
+
+    }
+  );
+
+
+  function getSupportedRecorderMimeType() {
+
+    if (
+      typeof MediaRecorder ===
+      "undefined"
+    ) {
+      return "";
+    }
+
+
+    const types = [
+
+      "audio/webm;codecs=opus",
+
+      "audio/webm",
+
+      "audio/ogg;codecs=opus",
+
+      "audio/mp4"
+
+    ];
+
+
+    for (
+      const type of types
+    ) {
+
+      try {
+
+        if (
+          MediaRecorder.isTypeSupported(
+            type
+          )
+        ) {
+
+          return type;
+        }
+
+      } catch (_) {}
+    }
+
+
+    return "";
+  }
+
+
+  function startRecording() {
+
+    if (
+      !mediaStream ||
+      !isRunning
+    ) {
+      return;
+    }
+
+
+    if (
+      typeof MediaRecorder ===
+      "undefined"
+    ) {
+
+      statusText.innerText =
+        "Error: Recording is not supported";
+
+      return;
+    }
+
+
+    try {
+
+      recordedChunks = [];
+
+
+      const mimeType =
+        getSupportedRecorderMimeType();
+
+
+      if (mimeType) {
+
+        mediaRecorder =
+          new MediaRecorder(
+            mediaStream,
+            {
+              mimeType: mimeType
+            }
+          );
+
+      } else {
+
+        mediaRecorder =
+          new MediaRecorder(
+            mediaStream
+          );
+      }
+
+
+      mediaRecorder.ondataavailable =
+        (e) => {
+
+          if (
+            e.data &&
+            e.data.size > 0
+          ) {
+
+            recordedChunks.push(
+              e.data
+            );
+          }
+        };
+
+
+      mediaRecorder.onerror =
+        (e) => {
+
+          console.error(
+            "Recorder Error:",
+            e
+          );
+
+          isRecording = false;
+
+          recBtn.innerText =
+            "Record";
+
+          recBtn.classList.remove(
+            "active-rec"
+          );
+
+          if (isRunning) {
+
+            statusText.innerText =
+              isMuted
+                ? "Status: Microphone MUTED 🔇"
+                : "Status: Microphone is LIVE 🔴";
+          }
+        };
+
+
+      mediaRecorder.onstop =
+        () => {
+
+          if (
+            !recordedChunks.length
+          ) {
+            return;
+          }
+
+
+          const finalType =
+            mediaRecorder.mimeType ||
+            "audio/webm";
+
+
+          const blob =
+            new Blob(
+              recordedChunks,
+              {
+                type: finalType
+              }
+            );
+
+
+          const url =
+            URL.createObjectURL(
+              blob
+            );
+
+
+          const a =
+            document.createElement(
+              "a"
+            );
+
+          a.style.display =
+            "none";
+
+          a.href =
+            url;
+
+          a.download =
+            `mic-recording-${Date.now()}.webm`;
+
+
+          document.body.appendChild(
+            a
+          );
+
+          a.click();
+
+
+          setTimeout(
+            () => {
+
+              try {
+
+                document.body.removeChild(
+                  a
+                );
+
+              } catch (_) {}
+
+
+              URL.revokeObjectURL(
+                url
+              );
+
+            },
+            500
+          );
+        };
+
+
+      mediaRecorder.start(
+        100
+      );
+
+
+      isRecording = true;
+
+
+      recBtn.innerText =
+        "Stop Rec";
+
+      recBtn.classList.add(
+        "active-rec"
+      );
+
+      statusText.innerText =
+        "Status: Recording Audio... ⏺️";
+
+
+    } catch (err) {
+
+      console.error(
+        "Recording Start Error:",
+        err
+      );
+
+      isRecording = false;
+
+      recBtn.innerText =
+        "Record";
+
+      recBtn.classList.remove(
+        "active-rec"
+      );
+
+      statusText.innerText =
+        "Error: Unable to start recording";
+    }
+  }
+
+
+  /* =========================================================
+     STOP RECORDING
+     ========================================================= */
+
+  function stopRecording() {
+
+    if (
+      mediaRecorder &&
+      mediaRecorder.state !==
+        "inactive"
+    ) {
+
+      try {
+
+        mediaRecorder.stop();
+
+      } catch (_) {}
+    }
+
+
+    isRecording = false;
+
+
+    recBtn.innerText =
+      "Record";
+
+    recBtn.classList.remove(
+      "active-rec"
+    );
+
+
+    if (isRunning) {
+
+      statusText.innerText =
+        isMuted
+          ? "Status: Microphone MUTED 🔇"
+          : "Status: Microphone is LIVE 🔴";
+    }
+  }
+
+
+  /* =========================================================
+     PAGE VISIBILITY
+     ========================================================= */
+
+  document.addEventListener(
+    "visibilitychange",
+    async () => {
+
+      if (
+        document.visibilityState ===
+        "visible" &&
+        isRunning &&
+        audioContext
+      ) {
+
+        try {
+
+          if (
+            audioContext.state ===
+            "suspended"
+          ) {
+
+            await audioContext.resume();
+          }
+
+        } catch (_) {}
+      }
+    }
+  );
+
+
+  /* =========================================================
+     CLEANUP
+     ========================================================= */
+
+  window.addEventListener(
+    "beforeunload",
+    () => {
+
+      if (mediaStream) {
+
+        mediaStream
+          .getTracks()
+          .forEach(
+            track => {
+
+              try {
+                track.stop();
+              } catch (_) {}
+
+            }
+          );
+      }
+
+      if (audioContext) {
+
+        try {
+          audioContext.close();
+        } catch (_) {}
+      }
+
+    }
+  );
+
+</script>
+
 </body>
 </html>
