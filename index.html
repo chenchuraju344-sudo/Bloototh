@@ -214,6 +214,8 @@
     let gainNode = null;
     let bassNode = null;
     let clarityNode = null;
+    let highpassFilter = null;
+    let compressorNode = null;
     let analyserNode = null;
     let isRunning = false;
     let isMuted = false;
@@ -240,7 +242,6 @@
     const canvas = document.getElementById('visualizer');
     const canvasCtx = canvas.getContext('2d');
 
-    // Resize canvas to match render dimensions
     function resizeCanvas() {
       canvas.width = canvas.parentElement.clientWidth;
       canvas.height = canvas.parentElement.clientHeight;
@@ -270,10 +271,8 @@
 
       for (let i = 0; i < bufferLength; i++) {
         barHeight = (dataArray[i] / 255) * canvas.height;
-
         canvasCtx.fillStyle = `rgb(56, 189, 248)`;
         canvasCtx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
-
         x += barWidth + 1;
       }
     }
@@ -309,41 +308,57 @@
         const AudioContextClass = window.AudioContext || window.webkitAudioContext;
         audioContext = new AudioContextClass({ latencyHint: 'interactive' });
 
+        // Hardware Echo Cancellation & Noise Filtering Enabled
         mediaStream = await navigator.mediaDevices.getUserMedia({
           audio: {
-            echoCancellation: false,
+            echoCancellation: true,
             noiseSuppression: true,
-            autoGainControl: true,
-            latency: 0
+            autoGainControl: false,
+            channelCount: 1
           }
         });
 
         sourceNode = audioContext.createMediaStreamSource(mediaStream);
         gainNode = audioContext.createGain();
-        
-        // Bass Filter Setup (Low-Shelf)
+
+        // 1. Highpass Filter: Cuts low rumble noise below 85Hz
+        highpassFilter = audioContext.createBiquadFilter();
+        highpassFilter.type = 'highpass';
+        highpassFilter.frequency.value = 85;
+
+        // 2. Dynamics Compressor: Prevents screeching feedback loops
+        compressorNode = audioContext.createDynamicsCompressor();
+        compressorNode.threshold.setValueAtTime(-20, audioContext.currentTime);
+        compressorNode.knee.setValueAtTime(30, audioContext.currentTime);
+        compressorNode.ratio.setValueAtTime(10, audioContext.currentTime);
+        compressorNode.attack.setValueAtTime(0.003, audioContext.currentTime);
+        compressorNode.release.setValueAtTime(0.25, audioContext.currentTime);
+
+        // 3. Bass Filter (Low-Shelf)
         bassNode = audioContext.createBiquadFilter();
         bassNode.type = 'lowshelf';
         bassNode.frequency.value = 250;
         bassNode.gain.value = parseFloat(bassSlider.value);
 
-        // Vocal Clarity Filter Setup (High-Shelf)
+        // 4. Vocal Clarity Filter (High-Shelf)
         clarityNode = audioContext.createBiquadFilter();
         clarityNode.type = 'highshelf';
         clarityNode.frequency.value = 3000;
         clarityNode.gain.value = parseFloat(claritySlider.value);
 
-        // Visualizer Setup
+        // 5. Visualizer Setup
         analyserNode = audioContext.createAnalyser();
         analyserNode.fftSize = 64;
 
-        // Apply Initial Gain
         gainNode.gain.setValueAtTime(parseFloat(gainSlider.value), audioContext.currentTime);
 
-        // Audio Chain: Source -> Bass -> Clarity -> Gain -> Analyser -> Output
-        sourceNode.connect(bassNode);
+        // Signal Chain: Source -> Highpass -> Bass -> Clarity -> Compressor -> Gain -> Destination & Analyser
+        sourceNode.connect(highpassFilter);
+        highpassFilter.connect(bassNode);
         bassNode.connect(clarityNode);
-        clarityNode.connect(gainNode);
+        clarityNode.connect(compressorNode);
+        compressorNode.connect(gainNode);
+
         gainNode.connect(analyserNode);
         gainNode.connect(audioContext.destination);
 
@@ -354,7 +369,6 @@
         isRunning = true;
         isMuted = false;
         
-        // UI Updates
         toggleBtn.innerText = "Turn Off";
         toggleBtn.classList.add('active');
         muteBtn.disabled = false;
@@ -384,8 +398,10 @@
         mediaStream.getTracks().forEach(track => track.stop());
       }
       if (sourceNode) sourceNode.disconnect();
+      if (highpassFilter) highpassFilter.disconnect();
       if (bassNode) bassNode.disconnect();
       if (clarityNode) clarityNode.disconnect();
+      if (compressorNode) compressorNode.disconnect();
       if (gainNode) gainNode.disconnect();
       if (analyserNode) analyserNode.disconnect();
       if (audioContext) audioContext.close();
@@ -393,7 +409,6 @@
       isRunning = false;
       isMuted = false;
 
-      // UI Reset
       toggleBtn.innerText = "Turn On";
       toggleBtn.classList.remove('active');
       muteBtn.disabled = true;
@@ -402,11 +417,9 @@
       muteBtn.classList.remove('muted');
       statusText.innerText = "Status: Microphone is OFF";
 
-      // Clear Visualizer
       canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
     }
 
-    // Toggle Mic Button
     toggleBtn.addEventListener('click', async () => {
       if (!isRunning) {
         await startMic();
