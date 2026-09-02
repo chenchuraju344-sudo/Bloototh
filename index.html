@@ -150,62 +150,6 @@
       cursor: pointer;
     }
 
-    /* Output Device Picker (NEW) */
-    .output-panel {
-      background: #0f172a;
-      padding: 12px 15px;
-      border-radius: 14px;
-      border: 1px solid #334155;
-      margin-bottom: 15px;
-      text-align: left;
-    }
-    .output-panel label {
-      display: block;
-      font-size: 0.75rem;
-      color: #94a3b8;
-      margin-bottom: 8px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.4px;
-    }
-    .output-row {
-      display: flex;
-      gap: 8px;
-    }
-    select#outputSelect {
-      flex: 1;
-      background: #1e293b;
-      color: #f8fafc;
-      border: 1px solid #475569;
-      border-radius: 8px;
-      padding: 9px 10px;
-      font-size: 0.82rem;
-      cursor: pointer;
-    }
-    select#outputSelect:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-    .refresh-btn {
-      background: #334155;
-      color: #f8fafc;
-      border: 1px solid #475569;
-      border-radius: 8px;
-      padding: 0 12px;
-      font-size: 0.9rem;
-      cursor: pointer;
-    }
-    .refresh-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-    .output-note {
-      margin-top: 8px;
-      font-size: 0.72rem;
-      color: #64748b;
-      line-height: 1.4;
-    }
-
     /* Status Bar */
     .status {
       padding: 10px;
@@ -232,18 +176,6 @@
     <div class="btn-group">
       <button id="muteBtn" class="action-btn" disabled>Mute Mic</button>
       <button id="recBtn" class="action-btn" disabled>Record</button>
-    </div>
-
-    <!-- NEW: Output Device Picker — forces playback to the chosen speaker -->
-    <div class="output-panel">
-      <label for="outputSelect">Play Sound Through</label>
-      <div class="output-row">
-        <select id="outputSelect" disabled>
-          <option value="">Turn mic on to list speakers…</option>
-        </select>
-        <button id="refreshOutputsBtn" class="refresh-btn" disabled title="Refresh device list">⟳</button>
-      </div>
-      <div class="output-note" id="outputNote"></div>
     </div>
 
     <div class="controls-panel">
@@ -275,12 +207,6 @@
     <div id="status" class="status">Status: Microphone is OFF</div>
   </div>
 
-  <!-- NEW: hidden audio element — the actual output bridge. WebAudio's
-       processed signal is piped into this element instead of straight to
-       audioContext.destination, so we can force it onto a specific output
-       device (the Bluetooth soundbox) with setSinkId(). -->
-  <audio id="outputAudioEl" autoplay playsinline style="display:none"></audio>
-
   <script>
     let audioContext = null;
     let mediaStream = null;
@@ -291,16 +217,6 @@
     let analyserNode = null;
     let isRunning = false;
     let isMuted = false;
-
-    // Low-cut filter removes handling-noise/rumble; limiter stops the
-    // acoustic mic-to-speaker loop from building into repeated/echoed audio.
-    let lowCutNode = null;
-    let limiterNode = null;
-
-    // NEW: MediaStreamDestination — turns the processed WebAudio graph back
-    // into a MediaStream so it can be attached to <audio id="outputAudioEl">
-    // and routed with setSinkId().
-    let mediaStreamDest = null;
 
     // Recording Variables
     let mediaRecorder = null;
@@ -323,13 +239,6 @@
     const statusText = document.getElementById('status');
     const canvas = document.getElementById('visualizer');
     const canvasCtx = canvas.getContext('2d');
-
-    // NEW: output device picker elements
-    const outputSelect = document.getElementById('outputSelect');
-    const refreshOutputsBtn = document.getElementById('refreshOutputsBtn');
-    const outputNote = document.getElementById('outputNote');
-    const outputAudioEl = document.getElementById('outputAudioEl');
-    const sinkIdSupported = typeof outputAudioEl.setSinkId === 'function';
 
     // Resize canvas to match render dimensions
     function resizeCanvas() {
@@ -394,73 +303,6 @@
       }
     });
 
-    // ---------------------------------------------------------------------
-    // NEW: Output device handling
-    // ---------------------------------------------------------------------
-
-    async function populateOutputDevices() {
-      if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
-        outputNote.innerText = 'This browser cannot list output devices.';
-        return;
-      }
-      try {
-        const devices = await navigator.mediaDevices.enumerateDevices();
-        const outputs = devices.filter((d) => d.kind === 'audiooutput');
-
-        outputSelect.innerHTML = '';
-        if (outputs.length === 0) {
-          const opt = document.createElement('option');
-          opt.value = '';
-          opt.textContent = 'No output devices found';
-          outputSelect.appendChild(opt);
-          return;
-        }
-
-        outputs.forEach((d, i) => {
-          const opt = document.createElement('option');
-          opt.value = d.deviceId;
-          opt.textContent = d.label || `Speaker ${i + 1}`;
-          outputSelect.appendChild(opt);
-        });
-
-        // Try to auto-pick a device that looks like a Bluetooth speaker
-        const btGuess = outputs.find((d) => /bluetooth|jbl|boat|soundbox|speaker/i.test(d.label));
-        if (btGuess) {
-          outputSelect.value = btGuess.deviceId;
-          await applyOutputDevice(btGuess.deviceId);
-        } else {
-          await applyOutputDevice(outputSelect.value);
-        }
-
-        outputSelect.disabled = !sinkIdSupported;
-        refreshOutputsBtn.disabled = !sinkIdSupported;
-
-        if (!sinkIdSupported) {
-          outputNote.innerText =
-            'Your browser can\'t switch output device from the page. Set the Bluetooth soundbox as the SYSTEM default speaker before pressing Turn On.';
-        } else {
-          outputNote.innerText = 'Pick your Bluetooth soundbox here if sound is coming from the phone instead.';
-        }
-      } catch (err) {
-        console.error('enumerateDevices error:', err);
-        outputNote.innerText = 'Could not list output devices.';
-      }
-    }
-
-    async function applyOutputDevice(deviceId) {
-      if (!sinkIdSupported) return;
-      try {
-        await outputAudioEl.setSinkId(deviceId || '');
-        statusText.innerText = 'Status: Output routed to selected speaker 🔊';
-      } catch (err) {
-        console.error('setSinkId error:', err);
-        outputNote.innerText = 'Could not switch to that device. Try selecting it again.';
-      }
-    }
-
-    outputSelect.addEventListener('change', (e) => applyOutputDevice(e.target.value));
-    refreshOutputsBtn.addEventListener('click', () => populateOutputDevices());
-
     // Start Microphone Engine
     async function startMic() {
       try {
@@ -469,7 +311,7 @@
 
         mediaStream = await navigator.mediaDevices.getUserMedia({
           audio: {
-            echoCancellation: true,
+            echoCancellation: false,
             noiseSuppression: true,
             autoGainControl: true,
             latency: 0
@@ -478,13 +320,7 @@
 
         sourceNode = audioContext.createMediaStreamSource(mediaStream);
         gainNode = audioContext.createGain();
-
-        // Low-cut (high-pass) filter — removes sub-100Hz handling noise/rumble
-        lowCutNode = audioContext.createBiquadFilter();
-        lowCutNode.type = 'highpass';
-        lowCutNode.frequency.value = 90;
-        lowCutNode.Q.value = 0.707;
-
+        
         // Bass Filter Setup (Low-Shelf)
         bassNode = audioContext.createBiquadFilter();
         bassNode.type = 'lowshelf';
@@ -497,50 +333,19 @@
         clarityNode.frequency.value = 3000;
         clarityNode.gain.value = parseFloat(claritySlider.value);
 
-        // Limiter (DynamicsCompressor) — clamps any feedback build-up
-        limiterNode = audioContext.createDynamicsCompressor();
-        limiterNode.threshold.setValueAtTime(-18, audioContext.currentTime);
-        limiterNode.knee.setValueAtTime(6, audioContext.currentTime);
-        limiterNode.ratio.setValueAtTime(16, audioContext.currentTime);
-        limiterNode.attack.setValueAtTime(0.002, audioContext.currentTime);
-        limiterNode.release.setValueAtTime(0.15, audioContext.currentTime);
-
         // Visualizer Setup
         analyserNode = audioContext.createAnalyser();
         analyserNode.fftSize = 64;
 
-        // NEW: MediaStreamDestination — bridges WebAudio back to a real
-        // <audio> element so we can pick its output device explicitly.
-        mediaStreamDest = audioContext.createMediaStreamDestination();
-
         // Apply Initial Gain
         gainNode.gain.setValueAtTime(parseFloat(gainSlider.value), audioContext.currentTime);
 
-        // Audio Chain: Source -> LowCut -> Bass -> Clarity -> Gain -> Limiter -> Analyser
-        //                                                              \-> MediaStreamDest -> <audio> -> chosen speaker
-        sourceNode.connect(lowCutNode);
-        lowCutNode.connect(bassNode);
+        // Audio Chain: Source -> Bass -> Clarity -> Gain -> Analyser -> Output
+        sourceNode.connect(bassNode);
         bassNode.connect(clarityNode);
         clarityNode.connect(gainNode);
-        gainNode.connect(limiterNode);
-        limiterNode.connect(analyserNode);
-        limiterNode.connect(mediaStreamDest);
-
-        // NOTE: we deliberately do NOT also connect limiterNode straight to
-        // audioContext.destination anymore — all sound now leaves through
-        // outputAudioEl so the sink (speaker) selection actually controls
-        // where it plays. Connecting both would double the audio.
-        outputAudioEl.srcObject = mediaStreamDest.stream;
-        try {
-          await outputAudioEl.play();
-        } catch (playErr) {
-          console.warn('Autoplay blocked, will retry on next tap:', playErr);
-          const retryOnce = () => {
-            outputAudioEl.play().catch(() => {});
-            document.removeEventListener('click', retryOnce);
-          };
-          document.addEventListener('click', retryOnce);
-        }
+        gainNode.connect(analyserNode);
+        gainNode.connect(audioContext.destination);
 
         if (audioContext.state === 'suspended') {
           await audioContext.resume();
@@ -557,10 +362,6 @@
         muteBtn.innerText = "Mute Mic";
         muteBtn.classList.remove('muted');
         statusText.innerText = "Status: Microphone is LIVE 🔴";
-
-        // NEW: now that mic permission is granted, device labels are
-        // visible — populate & apply the speaker picker.
-        await populateOutputDevices();
 
         drawVisualizer();
       } catch (err) {
@@ -583,20 +384,11 @@
         mediaStream.getTracks().forEach(track => track.stop());
       }
       if (sourceNode) sourceNode.disconnect();
-      if (lowCutNode) lowCutNode.disconnect();
       if (bassNode) bassNode.disconnect();
       if (clarityNode) clarityNode.disconnect();
       if (gainNode) gainNode.disconnect();
-      if (limiterNode) limiterNode.disconnect();
       if (analyserNode) analyserNode.disconnect();
-      if (mediaStreamDest) mediaStreamDest.disconnect();
       if (audioContext) audioContext.close();
-
-      // NEW: detach the output element cleanly
-      outputAudioEl.pause();
-      outputAudioEl.srcObject = null;
-      outputSelect.disabled = true;
-      refreshOutputsBtn.disabled = true;
 
       isRunning = false;
       isMuted = false;
